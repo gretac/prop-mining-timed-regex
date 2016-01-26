@@ -77,9 +77,22 @@ The key contributions of this paper involve developing an efficient framework fo
 \item Demonstrating the frameworks' applicability to large traces collected from real industrial systems  (Section X).
 \end{itemize}
 
+\section{Background}
+\subsection{Timed Regular Expressions}
 
-\section{Overview}
+Should we give examples of just timed regular expressions?The novel features here with respect to untimed regular expressions are the meaning of the atom $\underline{\alpha}$ which represents an arbitrary passage of time followed by an event $\alpha$ and the $\textless \Phi \textgreater _I$ operator which restricts the metric length of the time-event sequences in [[$\Phi$]] to be in the interval I.The '.' is the concatenation operator and the '+' is the operator for one or more instances of the expression.  
+
+\section{Approach}
 %% author: GC
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[trim = 1cm 0cm 0cm 0cm,clip = true,width=\linewidth]{figures/Workflow.png}
+  \caption{Property Mining Workflow}
+  \label{fig:work-flow Overview}
+\end{figure}
+
+\subsection{The Workflow}
 
 We use traces of execution collected during the runtime of a system. The event traces are generated using instrumentation already present in the system and include network traffic logs, operating system logs, or program instrumentation logs. The analyzer accepts a set of N logs, where N $\ge$ 1.
 
@@ -90,59 +103,36 @@ The abstract alphabet is used as a placeholder. The analyzer extracts a set of S
 
 Using an incidence matrix of dimension L we will evaluate which event combinations satisfy the given property. The acceptor FSM will iterate over the events in the system log and at each new event evaluate if any of the combinations in the matrix are satisfied. The matrix keeps track of the number of successes and failures to evaluate each concrete temporal property. 
 
-Since the number of concrete properties could be very large, SL, a ranking component is used to reduce the set to interesting properties only. The ranking criteria consist of support and probability. Support is the percentage of all traces that contain the property. Probability is the ration of successful evaluations of the property over total possible occurrences. By specifying a threshold for these values we can extract just the most interesting set. 
+\subsection{Dominant Properties}
 
-The effectiveness of approximate inference depends on picking a good satisfaction threshold. If the threshold is too high, interesting properties may be missed. But if it is too low, too many false and uninteresting properties will be preserved. Our experiments explore the appropriate values for thresholds for both measures.
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[trim = 1cm 0cm 0cm 0cm,clip = true,width=\linewidth]{figures/Workflow.png}
-  \caption{Property Mining Workflow}
-  \label{fig:work-flow Overview}
-\end{figure}
+The concrete properties examined by the analyzer contain every permutation of trace events within the template. These contain both interesting and frequently occurring patterns, as well as those that might have been found just a handful of times in the trace. Since the number of concrete properties could be very large, $S^L$, a ranking component is used to reduce the set to interesting properties only. The effectiveness of selecting a meaningful subset of properties depends on picking a good set of criteria and associated satisfaction thresholds. The ranking criterion we use is a combination of support and probability. Support is the percentage of all traces that contain the concrete property. Probability is the ration of successful evaluations of the property over total possible occurrences. We specify a threshold for these measures to extract properties that are consistently dominant in the collected traces. In section X our experiments explore the appropriate values for the thresholds.Another motivation for using the ranker is the presence of imperfect traces. Traces can be imperfect as a result of dropped events or execution of faulty programs. In such cases, properties may not be perfectly satisfied in the collected traces. By using the probability and support ranking criteria we focus on finding the dominant properties in the trace. 
 
 
-\section{Theroy}
+\section{Discussion}
 %% author: GC
 
-Our work mines temporal properties that can be expressed using timed regular expressions. 
+Our work mines temporal properties that can be expressed using timed regular expressions. The following discussion explores how the chosen approach accomplishes this and why it does so optimally.
 
-Regular expressions offer a declarative way to express the strings that we want to accept ~\cite{book1}. 
+\subsection{Using Timed Automata as Acceptors}
 
-Regular expressions can define exactly the same languages that the various forms of automata describe: the regular languages ~\cite{book1}. 
-
-Regular expressions and finite automata are two notations that turn out to represent exactly the same set of languages, the regular languages ~\cite{book1}. 
-
-Every language defined by a regular expression is also defined by a finite automaton, as defined by Theorem 3.7 in ~\cite{book1}. We can thus generate a Deterministic Finite Automaton (DFA) for any regular expression.
-
-There is a way to convert any regular expression into a non-deterministic automaton, and then to convert to a deterministic automaton. 
-
-The processing complexity for each character in the input is O(1) in a DFA.
-
-Timed automata are recognizers of timed languages. They have states, as any FSM, as well as clocks. 
-The language of a timed automaton consists of all the traces of its accepting runs ~\cite{timedregex}.
-
-According to Theorem 2 in ~\cite{timedregex}, every timed language defined by a (generalized extended) regular expression is accepted by a timed automaton.
-According to Theorem 7 in ~\cite{timedregex}, Kleene Theorem for Timed Automata, timed automata and generalized timed regular expressions have the same expressive power. 
-
-Allow for imperfect traces - using the probability and support we allow the property to not be satisfied sometimes, i.e. finding dominant properties. This addressed possibility of events being dropped from the trace, depends on the start and end point of the trace, as well as potential of imperfect executions, i.e. buggy programs. 
-
-The framework works by identifying the dominant properties of an imperfect trace.
-%------------------------------------------------
+First we can look at regular expressions and their acceptors without the timing constraints. Regular expressions offer a declarative way to express the patterns that we want to accept. Every language defined by a regular expression is also defined by a finite automaton, as defined by Theorem 3.7 in ~\cite{book1}. There is a way to convert any regular expression into a non-deterministic automaton, and further to convert from a non-deterministic to a deterministic automaton. We can thus generate a Deterministic Finite Automaton (DFA) for any regular expression.Similarly, timed automata are recognizers of timed languages. They have states, as any FSM, as well as clocks. Every timed language defined by a (generalized extended) regular expression is accepted by a timed automaton, as defined by Theorem 2 in ~\cite{timedregex}. Thus, timed automata and generalized timed regular expressions have the same expressive power. The language of a timed automaton consists of all the strings that it accepts ~\cite{timedregex}. The strings in our case are sequences of time-event pairs. The timed automata we generate are acceptors for strings that satisfy the desired property. The more strings in the trace that can be accepted, the more dominant is the property.
 
 \subsection{Memory Requirements}
 
-Matrix - L dimensions of S unique event symbols - SL space to hold acceptor results.
-
-Majority of properties that people care about most represent relationships among a few events only ~\cite{evans1, dwyer}.
+The main space requirement of our approach is for containing the matrix. The dimensionality L of the matrix depends on the number of abstract symbols in the desired property. The more events present in the relationship that the property encodes, the more dimensions of the matrix will be required. Each dimension of the matrix will consist of S unique event symbols. We want to encode the matrix to hold the evaluation results of every combinatorial combination of unique events. Thus we need $S^L$ space to hold acceptor results.The number of unique events S in the trace will depend on the complexity of the program or system. However more concerning is the dimensionality since it will lead to exponential growth of the space requirements.Majority of properties that people care about most represent relationships among a few events ~\cite{evans1, dwyer}. Thus the dimension L of the matrix will be constrained (How should we quantify that? Constrained to at most X events).Since our approach examines one event from the trace at a time, trace storage does not need to be replicated.The storage required for the FSM is proportional to the number of states. n is the length of the regular expression, then NFA has O(n) states and DFA has at most $O(S^n)$ states.
 
 \subsubsection{CPU Requirements}
 
+TBD
+
 Length of a single trace T - the number of lines/entries of time-event combinations. 
-The FSM will iterate over the trace once. At each trace line it will check the satisfiability for each entry in the matrix. The overall runtime will this be T * SL. 
+The FSM will iterate over the trace once. At each trace line it will check the satisfiability for each entry in the matrix (All or just for the event it just read from the trace?). The overall runtime will this be $T * S^L$. 
 This is a huge benefit as the length of traces can be huge, much larger than the complexity of the property. 
+The processing complexity for each character in the input is O(1) in a DFA.The key insight for achieving $O(ST)$ time complexity is that an event X from the trace can be treated as either a 0 event or a 1 event. (that was true in the peracotta paper for a property with 2 symbols only)
 
 \subsubsection{Optimality}
+
+TBD
 
 Why finite state machines are fastest for checking satisfiability of property in a trace? 
 
@@ -151,6 +141,8 @@ Since the properties are contained in a regular language, we can efficiently ana
 Why is using the matrix ensure fastest runtime?
 
 \subsubsection{Scaling the Approach}
+
+TBD
 
 How does the algorithm scale with respect to the property that we mine?
 

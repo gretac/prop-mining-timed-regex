@@ -4,3 +4,8 @@
 *.out
 *.synctex.gz
 property-mining.pdf
+*.make
+*.bbl
+*.blg
+*.d
+*.fls
