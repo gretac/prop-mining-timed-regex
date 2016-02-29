@@ -23,7 +23,6 @@
 \usepackage{placeins}
 \usepackage{hyperref}
 \usepackage{tikz}
-\usepackage{subfig,epstopdf, todonotes}
 \usetikzlibrary{automata,positioning}
 %\usepackage{amsmath,amsfonts,amssymb,mathtools,url,cite,xspace,graphicx,color,stmaryrd,multirow,verbatim,listings,tikz,pspicture,epstopdf,algorithm,listings,algorithmicx,algorithm,caption,todonotes,algpseudocode}
 \hypersetup{
@@ -64,7 +63,7 @@ Dynamic behavior of a program can be assessed through an examination of events e
 \end{abstract}
 
 \section{Introduction}
-%% author: AN
+
 Temporal behavior of programs has been extensively studied~\cite{lamport1978time, dwyer1999patterns}. Recently, the idea of mining system traces to derive likely temporal specifications of programs has become popular~\cite{lemieux2015general}. Mining techniques generally identify a set of specifications which are satisfied by traces w.r.t. certain criteria. Commonly used patterns of specifications are provided for mining a systems' specifications. Many programs lack formal temporal specifications, and mined specifications are therefore valuable and could be used for a wide variety of activities in software development life cycle (SDLC). These activities include software testing~\cite{dallmeier2010generating}, automated program verification~\cite{kincaid2015automated}, anomaly detection~\cite{christodorescu2008mining}, debugging~\cite{gabel2010online}, etc. Further, mined specifications can assist automated verification techniques because they provide an easy and user-friendly way to describe programs' specifications. As argued by Ammons et al.~\cite{DBLP:conf/popl/AmmonsBL02}, automated verification techniques are unlikely to be widely adopted unless cheaper and easier ways of formulating specifications are developed. Consequently, specification mining has gained significant attention in recent times. Different techniques have been developed for mining specifications using templates expressed using regular expressions, LTL and other custom formats.
 
 Most of the existing research in the context of mining temporal specifications focuses on qualitative notion of time, i.e., the specifications describe an \emph{ordering} of events. For example, an LTL specification $\Box(\mathrm{request}\,\rightarrow\,\lozenge \mathrm{response})$ specifies that a \emph{request} event should always be eventually followed by a \emph{response} event. Most state-of-the-art techniques do not take into account a \emph{quantitative} notion of time, i.e., the actual duration of time between events is not considered. For safety-critical real-time systems, it is important to develop techniques, which allow mining of specifications that account for the quantitative notion of time. For example, mining specifications of interrupt handlers, which complete their executions within a set of predefined deadlines for a real-time system, involves consideration about the quantitative notion of time. Such specifications are of important for safety-critical real-time systems for which a delayed response to an emitted event may lead to a fault in the system. Certain specifications of real-time systems can be modeled using timed regular expressions, which can be in turn translated into the corresponding timed automata.
@@ -85,11 +84,12 @@ The key contributions of this paper involve developing an efficient framework fo
 \item Demonstrating the frameworks' applicability to large traces collected from real industrial systems  (Section ~\ref{discussion}).
 \end{itemize}
 
+
 \section{Background} \label{Background}
 
 \subsection{Timed Regular Expressions}
 
-Classical automata theory handles only the \emph{qualitative} notion of time, i.e. a sequence of events specifies the ordering of events but not the time between the occurrence of these event in terms of ``real time". An abstraction of this sort has been found useful for analysis of certain systems, whereas many application domains require more detailed models which include accurate timing information. For example, we might want to modify a formal specification from ``a is followed by b" into a more precise specification with timing information as `` a is followed by b within $x$ seconds". We need to develop algorithms for mining specification with timing information. Timed automata \cite{AD94} (automata equipped with clock) has been investigated quite rigourously in the recent past. The main motivation of using timed automata is due to their suitability for modeling time-dependent behavior, and their ability to monitor their reachability \cite{LPY97}.
+Classical automata theory handles only the \emph{qualitative} notion of time, i.e. a sequence of events specifies the ordering of events but not the time between the occurrence of these events in terms of ``real time". An abstraction of this sort has been found useful for analysis of certain systems, whereas many application domains require more detailed models which include accurate timing information. For example, we might want to modify a formal specification from ``a is followed by b" into a more precise specification with timing information as `` a is followed by b within $x$ seconds". We need to develop algorithms for mining specification with timing information. Timed automata \cite{AD94} (automata equipped with clocks) have been investigated quite rigourously in the recent past. The main motivation of using timed automata is due to their suitability for modeling time-dependent behavior, and their ability to monitor their reachability \cite{LPY97}.
 
 We will formally describe our nomenclature.
 
@@ -109,14 +109,14 @@ We use the term \emph{event} to denote a place holder for an event. We use Time 
 \end{defns}
 
 
-\begin{defns}[TRE Templates] A TRE template is a TRE in which all of the atomic propositions are either event variables, events or time interval.
+\begin{defns}[TRE Templates] A TRE template is a TRE in which all of the atomic propositions are either event variables, events or time intervals.
 \end{defns}
 For example, the TRE template $<0.1>[x,y]$ represents the ``0 is always followed by 1 within the time interval [x,y]'', where $x \le y$ and are fixed doubles.
 
 A TRE instance corresponds to a TRE template and has an identical TRE structure. With each event variable in the TRE template when replaced by an event, we refer to the map as $binding$.
 
 \begin{defns}[TRE Instance]
-Let $\Pi$ be a TRE template. Then, $\pi$ is a TRE instance of $\Pi if \pi$ has a TRE similar to $\Pi$ in structure and where all the atomic propositions are events.
+Let $\Pi$ be a TRE template. Then, $\pi$ is a TRE instance of $\Pi$ if $ \pi$ has a TRE similar to $\Pi$ in structure and where all the atomic propositions are events.
 \end{defns}
 
 \begin{defns}[Binding]
@@ -164,24 +164,21 @@ $Reset_\rho$ resets all the clocks in $\rho$ to zero and leaves the other clocks
 
 It has been proved \cite{timedregex} that every timed regular language can be recognized by a timed automaton.  We present a simple example of representing the TRE using timed automata and vice-versa. The basic idea behind construction of a timed automata $\varphi^*$ is that we need the values of all the clocks at each new iteration of $\varphi$ to represent the total time elapsed in the previous iterations. This is achieved by adding a new clock $x$ which is never reset to zero and transitions to the initial state in which all the clocks get the value of $x$. In Figure \ref{fig:tretoautomata} we see that a new clock $x$ and a test $x \in I$ has been added to guard every transition leading to final state.
 
-\todo[inline]{Match Notation w.r.t previous section and edit the remaining part of the section}
 The novel features here with respect to untimed regular expressions are the meaning of the atom $\underline{\alpha}$ which represents an arbitrary passage of time followed by an event $\alpha$ and the $\textless \Phi \textgreater _I$ operator which restricts the metric length of the time-event sequences in [[$\Phi$]] to be in the interval I.
 
 The '.' is the concatenation operator and the '+' is the operator for one or more instances of the expression.
-
 
 \subsection{Dominant Properties}
 
 We express that a binding and its corresponding TRE instance are valid on a trace if the TRE instance holds on each trace in the log. Generally, we are interested in mining all of the valid TRE instances.
 
 \begin{defns}[Trace Support Potential]
-Trace support potential of a TRE instance $\pi$ on a trace $t$ is sthe number of time points of $t$ which could falsify $\pi$.
+Trace support potential of a TRE instance $\pi$ on a trace $t$ is the number of time points of $t$ which could falsify $\pi$.
 \end{defns}
 
 \begin{defns}[Trace Confidence (To be Verified)]
 Trace Confidence of a TRE $\pi$ on a trace $t$ is the number of time points of $t$ which could falsify $\pi$ but do not falsify $\pi$.
 \end{defns}
-
 
 The concrete properties examined by the analyzer contain every permutation of trace events within the template. These contain both interesting and frequently occurring patterns, as well as those that might have been found just a handful of times in the trace. Since the number of concrete properties could be very large, $S^L$, a ranking component is used to reduce the set to interesting properties only.
 
@@ -201,16 +198,16 @@ Another motivation for using the ranker is the presence of imperfect traces. Tra
 
 % \subsection{The Workflow} \label{the_workflow}
 
-We use execution traces collected during the runtime of a system. The event traces are generated using instrumentation already present in the system and include network traffic logs, operating system logs, or program instrumentation logs. The analyzer accepts a set of N logs, where N $\ge$ 1.
+We use traces of execution collected during the runtime of a system. The event traces are generated using instrumentation already present in the system and include network traffic logs, operating system logs, or program instrumentation logs. The analyzer accepts a set of N logs, where N $\ge$ 1.
 
-The templates in ~\ref{fig:work-flow Overview} refer to templates of temporal properties - timed regular expressions ~\cite{timedregex} that encode constraints on the relationships between subsets of trace events. Each template is an abstraction of the desired temporal property, like request, alternating, etc. ~\cite{evans1}. A template uses an abstract set of symbols ranging from $0$ to $L$, where $L$ is the length of the abstract alphabet. It also uses operators and time intervals as defined in ~\cite{timedregex}. For instance, (1.\textless0\textgreater[2,5])+ is a template for the response pattern. The '.' is the concatenation operator and the '+' is the operator for one or more instances of the expression.  The template specifies that some log event 1 is followed by another log event 0 within 2 to 5 time units, and this pattern occurs at least once in the execution trace.
+The templates in ~\ref{fig:work-flow Overview} refer to templates of temporal properties - timed regular expressions ~\cite{timedregex} that encode constraints on the relationships between subsets of trace events. Each template is an abstraction of the desired temporal property, like request, alternating, etc. ~\cite{evans1}. A template uses an abstract set of symbols ranging from 0 to L, where L is the length of the abstract alphabet. It also uses operators and time intervals as defined in ~\cite{timedregex}. For instance, (1.\textless0\textgreater[2,5])+ is a template for the response pattern. The '.' is the concatenation operator and the '+' is the operator for one or more instances of the expression.  The template specifies that some log event 1 is followed by another log event 0 within 2 to 5 time units, and this pattern occurs at least once in the execution trace.
 
-The abstract alphabet is used as a placeholder. The analyzer extracts a set of S unique event symbols from the collected traces and substitutes these in place of the abstract symbols to form concrete temporal properties. In the case of (1.\textless0\textgreater[2,5])+ the analyzer will evaluate the property for all combinations of two events in S. The key insight for achieving $O(nL)$ time complexity is that an event X from the trace can be treated as either a P event or an S event.
+The abstract alphabet is used as a placeholder. The analyzer extracts a set of S unique event symbols from the collected traces and substitutes these in place of the abstract symbols to form concrete temporal properties. In the case of (1.\textless0\textgreater[2,5])+ the analyzer will evaluate the property for all combinations of two events in S. The key insight for achieving O(nL) time complexity is that an event X from the trace can be treated as either a P event or an S event.
 
 Using an incidence matrix of dimension L we will evaluate which event combinations satisfy the given property. The acceptor FSM will iterate over the events in the system log and at each new event evaluate if any of the combinations in the matrix are satisfied. The matrix keeps track of the number of successes and failures to evaluate each concrete temporal property.
 
 
-An intuitive way to evaluate a time regular expression on a system execution trace is to recursively evaluate the TRE according to its semantics on the trace. A high level description of our algorithm is presented below.
+An intuitive way to evaluate a time regular expression on a system execution trace is to over the trace and recursively evaluate the TRE according to its semantics. A high level description of our algorithm is presented in
 
 
 \begin{itemize}
@@ -258,79 +255,12 @@ We used the most commonly occurring temporal property patterns \cite{evans} by t
 \caption{TRE Property Patterns}\label{TRE_Exp}
 \end{table}
 
-
-\section{Evaluation}
-%% author: YJ
-In this Section, we demonstrate the performance, scalability and usefulness of our approach. Our code is implemented as an R package\footnote{\url{https://github.com/gretac/ura.git}}, which internally uses C++ code for performance. `Rcpp'\footnote{\url{http://www.rcpp.org/}} is used for integration of R and  C++ modules. Ragel\footnote{\url{http://www.colm.net/open-source/ragel/}} is used to synthesize Timed Automata for TREs. We developed TRE variants of commonly used patterns of QREs~\cite{DBLP:conf/paste/YangE04}. By using these TRE variants as TRE templates, we mined TRE instances from real-world datasets: QNX traces and traces from controller area network (CAN). We used different thresholds for \emph{support} and \emph{confidence} to uncover interesting TRE instances. Further, to demonstrate the performance and scalability of our approach, we synthesized traces for different configurations w.r.t. the length of traces, number of variables in a TRE template and the number of distinct events in traces. For the experiments, we used a single eight core machine equipped with the Intel i7-3820 CPU at 3.60GHz and 31.4Gb of RAM. The machine runs Ubuntu 14.04 LTS 64 bit.
-
-\subsection{Performance Evaluation using Synthesized Traces}
-We synthesized traces by varying the following three parameters for execution traces: distinct number of events, total number of events and the number of variables in TRE templates. We used TREs in following classes of timed variants of commonly used property patterns: response, alternating, multi-effect, mutli-cause, effect-first, cause-first, one-cause and one-effect. We evaluated the performance of our mining algorithm under three different setups in which the value of one of the three parameters is varied by keeping the values of other parameters as constants.
-
-\todo[inline]{By Yogi: Add reference to loop in algorithm section}
-\noindent \textbf{Settings and Results:} We performed the experiment under four different settings. In each of the settings, the value of one of the parameters was varied. The values of others were kept constant. We executed each experiment 10 times.
-
-\noindent \textbf{Setting 1:}
-In Setting 1, the total number of events in execution traces were varied. The number of distinct events was set to 4, and the number of variables in TRE templates is set to 2. The details of four TRE templates, used in this experiment, are provided further in this section. The total number of events in execution traces were varied exponentially. As shown in Figure~\ref{fig:plot1}, the x axis shows the total number of events in execution traces, and the y axis shows the average overhead of our mining algorithm in terms of execution time. We note that we begin to measure the overhead of our algorithm when individual events are processed in the loop . Thus, the measurement does not include the initialization part of the algorithm whose overhead is constant. As shown in Figure~\ref{fig:plot1}, the overhead of our mining algorithms grows linearly w.r.t. the total number of events in a execution trace. For example, the average execution time is 170 milliseconds for processing 0.1 million events.
-
-\noindent \textbf{Setting 2:}
-In Setting 2, the number of distinct events is varied. There were 10,000 events in each execution trace, and the number of variables in TRE templates were set to 2. As shown in Figure~\ref{fig:plot2}, the x axis shows the number of distinct events in execution traces. The y axis reports the execution time of the mining algorithm. As seen, the overhead increases exponentially. The average overhead for processing a trace of 10,000 events with 25 distinct events is 594 milliseconds.
-
-We used the following TRE templates for Setting 1 and Setting 2.
-
-\noindent \textbf{T-1 (response)}: $(\verb!^!P)^*.((\langle P.(\verb!^!S)^*.S\rangle[0, 2000]).(\verb!^!P)^*$
-
-\noindent \textbf{T-2 (alternating)}: $(\verb!^!P,S)^*.((\langle P.(\verb!^!P,S)^*.S\rangle[0, 2000]).(\verb!^!P,S)^*$
-
-\noindent \textbf{T-3 (multi-effect)}: $(\verb!^!P,S)^*.((\langle P.(\verb!^!P,S)^*.S\rangle[0, 2000]).(\verb!^!P)^*$
-
-\noindent \textbf{T-4 (multi-cause)}: $(\verb!^!P,S)^*.((\langle P.(\verb!^!S)^*.S\rangle[0, 2000]).(\verb!^!P,S)^*$
-
-\noindent \textbf{Setting 3:}
-In Setting 3, we varied the number of parameters in TRE templates. The total number of events in execution traces were set constant at 10,000, and the number of distinct events was set to 10. Figure~\ref{fig:plot3} shows the variation in the average overhead w.r.t. the number of variables in TRE templates. As shown, the average overhead grows exponentially. The average overhead for processing an execution trace of 10,000 events with 10 distinct events with a TRE template containing 4 variables is 4156 milliseconds. For this setting, we used TRE templates with different number of variables, which are similar to the TRE templates used for Setting 1 and Setting 2. For the sake of brevity, we do not list these TRE templates.
-
-The experimental results confirm the asymptotic analysis of our algorithm's complexity, which is described in previous sections.
-
-We also compared the performance of Algorithm 1 and Algorithm 2 over synthesized traces. The size of the execution trace for this experiment was 50,000, and 30 distinct types of events were used. The following TRE templates were provided as an input to the algorithms.
-
-\begin{table*}[t]
-	\centering
-	\begin{tabular}{|l|l|}
-		\hline
-		\textbf{TRE templates for Algorithm 1} & \textbf{TRE templates for Algorithm 2} \\
-		\hline
-		 $(\langle P.\verb!^!Q^*.Q.\verb!^!R^*.R \rangle [1, 5000])$& $(\langle P.Q.R \rangle [1, 5000])$ \\
-	\end{tabular}
-
-	\caption{Comparing Algorithm 1 and Algorithm 2}
-	\label{miningOverhead}
-\end{table*}
-
-\begin{figure*}
-  \centering
-  \subfloat[Varying total number of events]{
-  \includegraphics[width=\columnwidth]{Plot1.eps}
-  \label{fig:plot1}
-  }
-  \subfloat[Varying number of distinct events]{
-  \includegraphics[width=\columnwidth]{Plot2.eps}
-  \label{fig:plot2}
-  }\\
-  \subfloat[Varying number of variables in TRE templates]{
-  \includegraphics[width=\columnwidth]{Plot3.eps}
-  \label{fig:plot3}
-  }
-  \subfloat[Comparing Overhead of Mining Different Classes of TRE templates]{
-  \includegraphics[width=\columnwidth]{Plot4.eps}
-  \label{fig:plot4}}
-  \caption{Results on Synthesized Traces}
-\end{figure*}
-
-
 \section{Discussion} \label{discussion}
+%% author: GC
 
 Our work mines temporal properties that can be expressed using timed regular expressions. The following discussion explores how the chosen approach accomplishes this and why it does so optimally.
 
-\subsection{Sound and Complete}
+\subsection{Using Timed Automata as Acceptors}
 
 %% talk about the technique being sound and complete
 
@@ -378,11 +308,6 @@ Our mining approach examines one time event pair from the trace at a time, witho
 store any past or future events for context. It also does not perform any changes on the
 contents of the trace. Thus the trace is stored only once and never replicated.
 
-%% Discuss optimality & scalability
-
-The number of symbols present in the property directly influences the matrix size. Thus the more complex the property, the more memory space will be required to store the results.
-
-The automaton for the property is generated once at the start. The automaton is then reused for every cell in the matrix.
 
 \subsubsection{CPU Requirements}
 
@@ -394,12 +319,29 @@ This is a huge benefit as the length of traces can be huge, much larger than the
 The processing complexity for each character in the input is O(1) in a DFA.
 The key insight for achieving $O(ST)$ time complexity is that an event X from the trace can be treated as either a 0 event or a 1 event. (that was true in the peracotta paper for a property with 2 symbols only)
 
-%% Discuss optimality & scalability
+\subsubsection{Optimality}
+
+TBD
+
+Why finite state machines are fastest for checking satisfiability of property in a trace?
+
+Since the properties are contained in a regular language, we can efficiently analyze them. The efficient analysis applies to any property that falls into the regular language. Each one can be represented with a matrix.
+
+Why is using the matrix ensure fastest runtime?
+
+\subsubsection{Scaling the Approach}
+
+TBD
+
+How does the algorithm scale with respect to the property that we mine?
 
 The scalability of dynamic property mining techniques is generally limited.
 The techniques scale poorly with the size of the input trace.
 
 
+The number of symbols present in the property directly influences the matrix size. Thus the more complex the property, the more memory space will be required to store the results.
+
+The automaton for the property is generated once at the start. The automaton is then reused for every cell in the matrix.
 
 \section{Conclusion}
 
@@ -412,3 +354,4 @@ TBD
 
 
 \end{document}
+
