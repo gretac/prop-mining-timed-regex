@@ -331,7 +331,8 @@ We also compared the performance of Algorithm 1 and Algorithm 2 over synthesized
 
 \section{Discussion} \label{discussion}
 
-Our work mines temporal properties that can be expressed using timed regular expressions. The following discussion explores how the chosen approach accomplishes this and why it does so optimally.
+The following discussion examines the following important characteristics of the technique we presented in this paper for mining temporal properties in the form of TREs from traces: soundness, completeness, optimality (in terms of space and runtime), and scalability.
+
 
 \subsection{Sound and Complete}
 
@@ -370,38 +371,35 @@ exponential space complexity.
 Next, we consider the storage requirements for the FSM used to evaluate the TRE.
 The storage required for the FSM is proportional to the number of its states ~\cite{book1}.
 If $n$ is the length of the TRE, then an equivalent NFA has $O(n)$ states
-and an equivalent DFA has at most $O(\Sigma^n)$ states.
-
-Similar to the matrix, complex properties that encode a lot of relationships between events result in
-exponential space growth for the FSM. However, majority of interesting properties will remain simple ~\cite{dwyer1999patterns}.
+and an equivalent DFA has at most $O(\Sigma^n)$ states. Similar to the matrix, complex properties that encode a lot of relationships between events result in exponential space growth for the FSM. However, majority of interesting properties will remain simple ~\cite{dwyer1999patterns}.
 
 
-Lastly, the storage requirements for the trace are equivalent to the length of the trace, $O(t)$.
+Lastly, the storage requirements for the trace are equivalent to the length of the trace, $O(L)$.
 Our mining approach examines one time event pair from the trace at a time, without needing to
 store any past or future events for context. It also does not perform any changes on the
 contents of the trace. Thus the trace is stored only once and never replicated.
 
 %% Discuss optimality & scalability
 
-The number of symbols present in the property directly influences the matrix size. Thus the more complex the property, the more memory space will be required to store the results.
 
-The automaton for the property is generated once at the start. The automaton is then reused for every cell in the matrix.
+\subsubsection{Runtime Requirements}
 
-\subsubsection{CPU Requirements}
+We assess the performance of our mining approach in terms of the time required to evalute a TRE template on a set of collected system traces.
 
-TBD
+The runtime performance of the proposed technique differs depending on whether negation is included within the expression.
+Lets first consider the runtime with negation. When an event variable in the TRE template is negated, the automaton must evaluate all existing TRE instances. This is bacause at evaluation time the satisfiability of any of the TRE instance may be affected. The automaton will thus evaluate $O(\Sigma^p)$ TRE instances for every time-event pair in the trace. Given that the length of the trace $t$ is $L$, the overall runtime will be $O(\Sigma^p \times L)$.
 
-Length of a single trace T - the number of lines/entries of time-event combinations.
-The FSM will iterate over the trace once. At each trace line it will check the satisfiability for each entry in the matrix (All or just for the event it just read from the trace?). The overall runtime will this be $T * S^L$.
-This is a huge benefit as the length of traces can be huge, much larger than the complexity of the property.
-The processing complexity for each character in the input is O(1) in a DFA.
-The key insight for achieving $O(ST)$ time complexity is that an event X from the trace can be treated as either a 0 event or a 1 event. (that was true in the peracotta paper for a property with 2 symbols only)
+Next we will consider the runtime of the techinique for TRE templates without negation. This case differs in that only the TRE instances where the bounded event corresponds to that read from the trace needs to be evaluated. We can thus reduce the previous runtime by evaluating ony a subset of all TRE instances. Providing a bound on the runtime relies on an analysis of the subset of TRE instances that contain the observed event.
+
+Considering that the binding function maps events to event variables with no replacement, meaning different events canot be mapped to the same event variable, there will be $p \times ^{(\Sigma - 1)}P_{(p - 1)}$ TRE instances that will need to be evaluated. This is equivalent to $\frac{p \times (\Sigma - 1)!}{(\Sigma - p)!}$. The overall runtime without negation is thus
+$O(p \times ^{(\Sigma - 1)}P_{(p - 1)} \times L)$. The relative speedup when compared to the runtime for expressions with negation is $\frac{\Sigma}{p}$.
 
 %% Discuss optimality & scalability
 
-The scalability of dynamic property mining techniques is generally limited.
-The techniques scale poorly with the size of the input trace.
+Generally, scalability of dynamic property mining techniques is limited.
+The techniques tend to scale poorly with the size of the input trace $L$. Our technique is optimal in that respect as the runtime grows linearly with the increasing size of $L$. Given that $L \gg \Sigma$ and $L \gg p$, reading each line of the trace at most once is preffered.
 
+Finally, as mentioned earlier, since the majority of interesting properties are not complex, $\Sigma^p$ will remain small in majority of real life situations.
 
 
 \section{Conclusion}
