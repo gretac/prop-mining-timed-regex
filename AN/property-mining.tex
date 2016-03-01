@@ -89,53 +89,55 @@ The key contributions of this paper involve developing an efficient framework fo
 
 \subsection{Timed Regular Expressions}
 
-Classical automata theory handles only the \emph{qualitative} notion of time, i.e. a sequence of events specifies the ordering of events but not the time between the occurrence of these event in terms of ``real time". An abstraction of this sort has been found useful for analysis of certain systems, whereas many application domains require more detailed models which include accurate timing information. For example, we might want to modify a formal specification from ``a is followed by b" into a more precise specification with timing information as `` a is followed by b within $x$ seconds". We need to develop algorithms for mining specification with timing information. Timed automata \cite{AD94} (automata equipped with clock) has been investigated quite rigourously in the recent past. The main motivation of using timed automata is due to their suitability for modeling time-dependent behavior, and their ability to monitor their reachability \cite{LPY97}.
-
-We will formally describe our nomenclature.
+Classical automata theory handles only the \emph{qualitative} notion of time, i.e. a sequence of events specifies the ordering of events but not the time between occurrence of these events in terms of ``real time". An abstraction of this sort has been found useful for analysis of certain systems [???], whereas many other application domains require more detailed models which include accurate timing information [???]. For example, we might want to modify a formal specification \emph{``a is followed by b"} to a more precise specification with timing constraints \emph{``a is followed by b within $x$ seconds"}. Since our focus lies on real-time safety-critical systems, we need to develop techniques for mining specifications that include the relevant timing information. We use the formalism of Timed Regular Expressions for our purpose as it allows for defining explicit timing constraints in the model. We will formally describe our nomenclature.
 
 \newtheorem{defns}{Definition}
 
 \begin{defns}[Trace and event]
-The alphabets of events is a finite alphabet of strings. An ordered sequence of events is a trace.
+The alphabet of events is a finite alphabet of strings. An timed sequence of events is a trace.
 \end{defns}
 
-We use the term \emph{event} to denote a place holder for an event. We use Time Regular Expressions (TRE) \cite{timedregex} to provide specification templates.
+The sequences of events in the trace are ordered by time stamps.
+The alphabet of events is defined by the system generating the traces. The events have associated meaning pertaining to the functionality of the system.
 
-\begin{defns}[Timed Regular Expression (TRE)\cite{timedregex}] Timed regular expressions over an alphabet $\Sigma$ (also referred to as $\Sigma$-expressions) are defined using the following families of rules.
+
+\begin{defns}[Timed Regular Expression (TRE) \cite{timedregex}]
+Timed regular expressions (TREs) over an alphabet $\Sigma$ (also referred to as $\Sigma$-expressions) are defined using the following families of rules:
 \begin{itemize}
-  \item  \underbar{a} for every letter a $\in \Sigma$ and the special symbol $\epsilon$ are expressions
-  \item If $\phi$, $\phi_1$ and $\phi_2$ are $\Sigma$ expressions and $I$ is an integer bound interval then $\langle \phi \rangle_I$, $\phi_1 \dot \phi_2$, $\phi_1 \vee \phi_2$ and $\phi^*$ are $\Sigma$ expressions.
+  \item  \underbar{a} for every letter a $\in \Sigma$ and the special symbol $\epsilon$ are expressions,
+  \item If $\varphi$, $\varphi_1$ and $\varphi_2$ are $\Sigma$-expressions and $I$ is an integer bound interval then $\langle \varphi \rangle_I$, $\varphi_1 \dot \varphi_2$, $\varphi_1 \vee \varphi_2$ and $\varphi^*$ are $\Sigma$-expressions.
 \end{itemize}
 \end{defns}
 
+The novel features here with respect to untimed regular expressions are the meaning of the atom $\underline{\alpha}$ which represents an arbitrary passage of time followed by an event $\alpha$ and the $\textless \phi \textgreater _I$ operator which restricts the metric length of the time-event sequences in [[$\phi$]] to be in the interval I. It is important to note that we use TREs, as defined above, to provide specification templates.
 
-\begin{defns}[TRE Templates] A TRE template is a TRE in which all of the atomic propositions are either event variables, events or time interval.
+
+\begin{defns}[TRE Templates]
+A TRE template is a TRE in which all of the atomic propositions are either event variables, events, or time intervals.
 \end{defns}
-For example, the TRE template $<0.1>[x,y]$ represents the ``0 is always followed by 1 within the time interval [x,y]'', where $x \le y$ and are fixed doubles.
 
-A TRE instance corresponds to a TRE template and has an identical TRE structure. With each event variable in the TRE template when replaced by an event, we refer to the map as $binding$.
+A TRE template is a template for the specifications that we want to mine. We use the term \emph{event variable} to denote a place holder for an event. For example, the TRE template $<0.1>[x,y]$ represents \emph{``0 is always followed by 1 within the time interval [x,y]''}, where 0 and 1 are \emph{event variables} and where $x \le y$ are fixed doubles used in the \emph{time interval}.
+
 
 \begin{defns}[TRE Instance]
-Let $\Pi$ be a TRE template. Then, $\pi$ is a TRE instance of $\Pi if \pi$ has a TRE similar to $\Pi$ in structure and where all the atomic propositions are events.
+Let $\Pi$ be a TRE template. Then, $\pi$ is a TRE instance of $\Pi$ if $\pi$ has a TRE similar to $\Pi$ in structure where all the atomic propositions are events.
 \end{defns}
 
 \begin{defns}[Binding]
 Let $\Sigma$ be an alphabet of events and let $V$ be a finite set of event variables. Then, a binding is a function $b \colon V \rightarrow \Sigma$
 \end{defns}
 
-Applying a binding to the variables in a TRE template creates a TRE instance corresponding to that binding.
-
-As we propose a framework that mines properties in the form of TREs from system traces using an abstract structure of the property using a finite state machine (FSM) to serve as an acceptor. We use the formalism of Timed automata for our purpose as it allows for enforcing explicit timing constraints in the model.
+A TRE instance corresponds to a TRE template and has an identical TRE structure. Applying a binding to the event variables in a TRE template creates a TRE instance corresponding to that binding. The $binding$ is thus a map used to replace event variables with events from the given alphabet.
 
 \subsection{Timed Automata}
 
-Timed automata is a theory for modeling and verification of real time systems.  Explicit timing constraint are naturally present in real-life systems. Classical models (finite automata, Petri-nets etc.) cannot express such real time constraints. Time automata \cite{Alur1990, Alur1994183} has been used extensively for modeling real-time systems. One of the most important properties of the timed automata is probably that the reachability properties are decidable \cite{Alur1994183} even though the timed automata have infinite number of configurations. The main idea behind this result is the construction of region-automaton, which finitely abstracts the behavior of timed automata in a way that checking reachability in a timed automata reduces to checking reachability in a finite automaton.
+Timed automata \cite{AD94} have been investigated quite rigourously in the recent past. The main motivation for using timed automata is their suitability for modeling time-dependent behavior, and the ability to monitor their reachability \cite{LPY97}. Timed automata are equipped with clocks, making them perfect for modelling and verification of real-time systems' behavior \cite{Alur1990, Alur1994183}. Classical models like finite automata, Petri-nets, etc., are not suitable since they cannot express such explicit timing constraints natuarally present in real-life systems. Another important property of the timed automata is that the reachability properties are decidable \cite{Alur1994183}, even though the timed automata have an infinite number of configurations. The main idea behind this result is the construction of a region-automaton, which finitely abstracts the behavior of timed automata in a way that checking reachability in a timed automaton reduces to checking reachability in a finite automaton.
 
 \begin{defns}[Timed Automata \cite{timedregex}]
 A timed automaton  $\mathcal{A}$ is a tuple $\langle Q,C,\Delta ,\Sigma, s,F\rangle$ where $Q$ is a finite set of states, $C$ is a finite set of clocks, $\Sigma$ is an input (or event) alphabet, $\Delta$ is a transition relation, $s \in Q$ an initial state and $F \subset Q$ a set of accepting states. The transition relation consists of tuples of the form $\langle q ,\phi ,\rho, a, q' \rangle$ where $q$ and $q'$  are states, $a \in \Sigma \cup \{\epsilon \}$ is a letter, $\rho \subseteq C$ and $\phi$ (the transition guard) is a boolean combination of formulae of the form $(x \in I)$ for some clock $x$ and some integer-bounded interval $I$.
 \end{defns}
 
-A clock valuation is a function $v \colon C \rightarrow \mathbb{R}^+$, or equivalently a $|C|$-dimensional vector over $\mathbb{R}^+$. We denote the set of all clock valuations by $\mathcal{H}$ . A configuration of the automaton is hence a pair $(q,v) \in Q \times H$ consisting of a discrete state (sometimes called “location”) and a clock valuation. Every subset $\rho \subseteq C$ induces a reset function $Reset_\rho : H \rightarrow H$ defined for every clock valuation $v$ and every clock variable $x \in C$ as
+A clock valuation is a function $v \colon C \rightarrow \mathbb{R}^+$, or equivalently a $|C|$-dimensional vector over $\mathbb{R}^+$. We denote the set of all clock valuations by $\mathcal{H}$ . A configuration of the automaton is hence a pair $(q,v) \in Q \times \mathcal{H}$ consisting of a discrete state (sometimes called “location”) and a clock valuation. Every subset $\rho \subseteq C$ induces a reset function $Reset_\rho : \mathcal{H} \rightarrow \mathcal{H}$ defined for every clock valuation $v$ and every clock variable $x \in C$ as
 
 \begin{equation}\label{timed_automaton}
 Reset_\rho v(x) = \begin{cases}
@@ -155,39 +157,40 @@ $Reset_\rho$ resets all the clocks in $\rho$ to zero and leaves the other clocks
    \node[state, accepting] (f1) [right=of f] {};
    \path[->]
     (s) edge node {$a, \phi$} (f)
-        edge [bend left] node {$a,\phi \wedge x\in I$}(f1);
-    \draw[thick,dotted] (-1.5,-0.75) rectangle (4.75,1.25);
+        edge [bend left,dashed] node {$a, \phi \wedge x\in I$} (f1);
+    \draw[thick,dotted] (-1.5,-0.75) rectangle (3.25,0.75);
 \end{tikzpicture}
 \caption{Timed Automata from a Timed Regular Expression}
 \label{fig:tretoautomata}
 \end{figure}
 
-It has been proved \cite{timedregex} that every timed regular language can be recognized by a timed automaton.  We present a simple example of representing the TRE using timed automata and vice-versa. The basic idea behind construction of a timed automata $\varphi^*$ is that we need the values of all the clocks at each new iteration of $\varphi$ to represent the total time elapsed in the previous iterations. This is achieved by adding a new clock $x$ which is never reset to zero and transitions to the initial state in which all the clocks get the value of $x$. In Figure \ref{fig:tretoautomata} we see that a new clock $x$ and a test $x \in I$ has been added to guard every transition leading to final state.
+It has been proven \cite{timedregex} that every timed regular language can be recognized by a timed automaton. We present a few simple examples of representing TREs using timed automata.
 
-\todo[inline]{Match Notation w.r.t previous section and edit the remaining part of the section}
-The novel features here with respect to untimed regular expressions are the meaning of the atom $\underline{\alpha}$ which represents an arbitrary passage of time followed by an event $\alpha$ and the $\textless \Phi \textgreater _I$ operator which restricts the metric length of the time-event sequences in [[$\Phi$]] to be in the interval I.
+Consider the TRE $\langle \varphi_1  \rangle_I$ and its equivalent timed automaton shown in \ref{fig:tretoautomata}. Within the rectangle, we have the acceptor for $\varphi_1$ with no timing constraints. For the timed operator, a new clock $x$ is introduced and a test $x \in I$ has been added to guard every transition leading to the final state $f$.
 
-The '.' is the concatenation operator and the '+' is the operator for one or more instances of the expression.
+
+Lets further examine the basic idea behind construction of a timed automaton for $\varphi^*$. If the time interval applies to each $\varphi$ separately, then the clocks need to be reset at each new iteration of $\varphi$. On the other hand, if the time interval applies to the whole $\varphi^*$ expression, we need the values of all clocks at each new iteration of $\varphi$ to represent the total time elapsed in the previous iterations. This is achieved by adding a new clock $x$ which is never reset to zero and transitions to the initial state in which all the clocks get the value of $x$.
 
 
 \subsection{Dominant Properties}
 
-We express that a binding and its corresponding TRE instance are valid on a trace if the TRE instance holds on each trace in the log. Generally, we are interested in mining all of the valid TRE instances.
+The TRE instances generated by the binding contain every permutation of events in the alphabet within the TRE template. There is thus a total of $\Sigma^p$ possible TRE instances. Generally, we are interested in mining all of the valid TRE instances.
+However, these instances contain both interesting and frequently occuring patterns, as well as those that might have been present just a handfull of times in the trace. We thus use a ranking component to reduce the mined set to contain only the dominant instances, or specifications.
 
-\begin{defns}[Trace Support Potential]
-Trace support potential of a TRE instance $\pi$ on a trace $t$ is sthe number of time points of $t$ which could falsify $\pi$.
+
+
+\begin{defns}[Confidence]
+The confidence of a TRE instance $\pi$ in a trace $t$ is the proportion of points in $t$ that do not falsify $\pi$ to the total number of points that could falsify $\pi$.
 \end{defns}
 
-\begin{defns}[Trace Confidence (To be Verified)]
-Trace Confidence of a TRE $\pi$ on a trace $t$ is the number of time points of $t$ which could falsify $\pi$ but do not falsify $\pi$.
+\begin{defns}[Support]
+The support of a TRE instance $\pi$ is the proportion of all available traces where the TRE confidence is $\ge 0$.
 \end{defns}
 
 
-The concrete properties examined by the analyzer contain every permutation of trace events within the template. These contain both interesting and frequently occurring patterns, as well as those that might have been found just a handful of times in the trace. Since the number of concrete properties could be very large, $S^L$, a ranking component is used to reduce the set to interesting properties only.
+The ranking component we use is a combination of support and confidence. The effectiveness of selecting a meaningful subset of specifications depends on picking a good set of thresholds. We express that a binding and its corresponding TRE instance are interesting if the TRE instance holds for each trace, thus $100 \%$ support. Similarly, we specify that specifications must have $ \ge 98 \%$ confidence in order to be considered dominant.
 
-The effectiveness of selecting a meaningful subset of properties depends on picking a good set of criteria and associated satisfaction thresholds. The ranking criterion we use is a combination of support and probability. Support is the percentage of all traces that contain the concrete property. Probability is the ration of successful evaluations of the property over total possible occurrences. We specify a threshold for these measures to extract properties that are consistently dominant in the collected traces. In section X our experiments explore the appropriate values for the thresholds.
-
-Another motivation for using the ranker is the presence of imperfect traces. Traces can be imperfect as a result of dropped events or execution of faulty programs. In such cases, properties may not be perfectly satisfied in the collected traces. By using the probability and support ranking criteria we focus on finding the dominant properties in the trace.
+Defining a threshold for the confidence value is more difficult than for the support value. Since the total number of mined TRE instances is often very large in real systems, we would ideally keep the confidence value at $100 \%$. However, the motivation to reduce this threshold slightly is due to the presence of imperfect traces. Traces can be imperfect as a result of dropped events or execution of faulty programs. In such cases, dominant properties may not be perfectly satisfied in the collected traces. Reducing the threshold will thus include dominant properties from imperfect traces.
 
 
 \section{Approach} \label{Approach}
