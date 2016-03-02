@@ -230,14 +230,15 @@ Once the entire trace has been processed, the ranker will iterate over the matri
 
 \subsection{TRE Mining Algorithm}
 
-An intuitive way to evaluate a TRE on a system execution trace is to recursively evaluate the TRE according to its semantics on the trace. A high level description of our algorithm is presented below.
+An intuitive way to evaluate a TRE on a system execution trace is to recursively evaluate the TRE according to its semantics at every line of the trace. A high level description of the steps taken by the proposed algorithm are as follows:
 
 \begin{itemize}
-\item \textbf{Representing a TRE} We parse the input timed regular expression and transform it into a timed automata.
-\item \textbf{Representing a trace} We parse the input trace into a  linear array representation where each unique event has its corresponding time and event id [time, eventid].
-\item \textbf{Checking property instances over traces} We iterate over the set of each unique event and process the entire trace with respect to each unique event. Updating the \emph{success} and \emph{reset} for the entire trace. Processing the trace refers to matching the required TRE in the process trace.
+\item \textbf{Representing a TRE} Parse the input TRE template and transform it into a timed automaton.
+\item \textbf{Representing a trace} Parse the input trace into a linear array representation where each unique event has its corresponding time and event id, \emph{[time, eventid]}.
+\item \textbf{Checking TRE instances over traces} Iterate over the trace and process each time event pair by matching them to the relavant TRE instances. Update the \emph{success} and \emph{reset} for the relevant TRE instances at each trace event.
 \end{itemize}
 
+Below, in Algorithm ~\ref{alg:the_alg}, is a detailed description of the above steps in form of pseudo code.
 
 \begin{algorithm}[h]
     \caption{Timed Regular Expression Mining}\label{alg:the_alg}
@@ -256,11 +257,12 @@ An intuitive way to evaluate a TRE on a system execution trace is to recursively
     \end{algorithmic}
 \end{algorithm}
 
-In Algorithm ~\ref{alg:the_alg} $\Sigma$ is the set of alphabets and $p$ is the number of event variables in the TRE. $A$ denotes the timed automaton and $FS$ and $ES$ denote the final and error states of the timed automaton. $S$ and $C$ denote the \emph{support} and \emph{confidence} metrics of the TRE on the given trace.
+In Algorithm ~\ref{alg:the_alg}, $\Sigma$ is the events alphabet and $p$ is the number of event variables in the TRE template. $A$ denotes the timed automaton and $FS$ and $ES$ denote the final and error states of the timed automaton respectively. $S$ and $C$ denote the \emph{support} and \emph{confidence} metrics of the TRE instances on the given trace.
 
 \subsection{Temporal Property Patterns}
 
-We used the most commonly occurring temporal property patterns \cite{evans} by transforming them into Time Regular Temporal Property patterns. Let us assume we have several causing events $P$ to share one effect event $S$. The TRE property patterns are presented in Table ~\ref{TRE_Exp}.
+The proposed technique relies on mining patterns that include timing constraints. Of interest are the most commonly occurring temporal property patterns, as descrbed in \cite{evans1}. In order to make use of these patterns, we extend them by transforming them into TRE Property Patterns. Let us assume we have several causing events $P$ to share one effect event $S$. The TRE property patterns are presented in Table ~\ref{TRE_Exp}. The properties impose timing constraints on events by adding a time interval $[x, y]$, where $x \le y$ are fixed doubles.
+
 \begin{table}[ht]
   \centering
   \begin{tabular}{|c|c|}
