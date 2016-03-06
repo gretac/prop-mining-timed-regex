@@ -268,7 +268,7 @@ In Algorithm ~\ref{alg:the_alg}, $\Sigma$ is the events alphabet and $p$ is the 
 
 \subsection{Temporal Property Patterns}
 
-The proposed technique relies on mining patterns that include timing constraints. Of interest are the most commonly occurring temporal property patterns, as descrbed in \cite{evans1}. In order to make use of these patterns, we extend them by transforming them into TRE Property Patterns. Let us assume we have several causing events $P$ to share one effect event $S$. The TRE property patterns are presented in Table ~\ref{TRE_Exp}. The properties impose timing constraints on events by adding a time interval $[x, y]$, where $x \le y$ are fixed doubles.
+The proposed technique relies on mining patterns that include timing constraints. Of interest are the most commonly occurring temporal property patterns, as descrbed in ~\cite{evans1}. In order to make use of these patterns, we extend them by transforming them into TRE Property Patterns. Let us assume we have several causing events $P$ to share one effect event $S$. The TRE property patterns are presented in Table~\ref{TRE_Exp}. The properties impose timing constraints on events by adding a time interval $[x, y]$, where $x \le y$ are fixed doubles.
 
 \begin{table}[ht]
   \centering
@@ -291,21 +291,28 @@ The proposed technique relies on mining patterns that include timing constraints
 
 \section{Evaluation}
 
-In this Section, we demonstrate the performance, scalability and usefulness of our approach. Our code is implemented as an R package\footnote{\url{https://github.com/gretac/ura.git}}, which internally uses C++ code for performance. `Rcpp'\footnote{\url{http://www.rcpp.org/}} is an R package used for integration of R and  C++ modules. Ragel\footnote{\url{http://www.colm.net/open-source/ragel/}} is a framework used to synthesize Timed Automata for TREs. We developed TRE property pattern variants, such as shown in Table ~\ref{TRE_Exp}, of commonly used patterns of QREs ~\cite{DBLP:conf/paste/YangE04}. By using these TRE variants as TRE templates, we mined TRE instances from real-world system traces: QNX tracelogger and controller area network (CAN) communication traces. We used different thresholds for \emph{support} and \emph{confidence} to uncover interesting TRE instances. Further, to demonstrate the performance and scalability of our approach, we synthesized traces for different configurations w.r.t. the length of traces, number of variables in a TRE template, and the number of distinct events in traces. For the experiments, we used a single eight core machine equipped with the Intel i7-3820 CPU at 3.60GHz and 31.4Gb of RAM. The machine runs Ubuntu 14.04 LTS 64 bit.
+In this Section, we demonstrate the performance and scalability of our approach using a set of real system traces and a set of synthetic traces.
+
+The implementation is made using a combination of R and C++ and is made available as an R package \footnote{\url{https://github.com/gretac/ura.git}}. We use an R package `Rcpp'\footnote{\url{http://www.rcpp.org/}} for integration of R and C++ and make use of C++ internally for better performance. Ragel\footnote{\url{http://www.colm.net/open-source/ragel/}} is a framework we used to synthesize Timed Automata for TREs.
+
+We developed TRE property pattern variants, such as shown in Table~\ref{TRE_Exp}, of commonly used patterns of QREs ~\cite{DBLP:conf/paste/YangE04}. By using these TRE variants as TRE templates, we mined TRE instances from real-world system traces: QNX tracelogger and controller area network (CAN) communication traces. We used different thresholds for \emph{support} and \emph{confidence} to uncover interesting TRE instances. Further, to demonstrate the performance and scalability of our approach, we synthesized traces for different configurations w.r.t. the length of traces, number of variables in a TRE template, and the number of distinct events in traces. For the experiments, we used a single eight core machine equipped with the Intel i7-3820 CPU at 3.60GHz and 31.4Gb of RAM. The machine runs Ubuntu 14.04 LTS 64 bit.
 
 \subsection{Performance Evaluation using Synthesized Traces}
-We synthesized traces by varying the following three parameters for execution traces: distinct number of events, total number of events and the number of variables in TRE templates. We used TREs in following classes of timed variants of commonly used property patterns: response, alternating, multi-effect, mutli-cause, effect-first, cause-first, one-cause and one-effect. We evaluated the performance of our mining algorithm under three different setups in which the value of one of the three parameters is varied by keeping the values of other parameters as constants.
 
-\todo[inline]{By Yogi: Add reference to loop in algorithm section}
-\noindent \textbf{Settings and Results:} We performed the experiment under four different settings. In each of the settings, the value of one of the parameters was varied. The values of others were kept constant. We executed each experiment 10 times.
+Real system traces are suitable for testing the feasibility and usefullness of our proposed technique. However, they cannot be easily used to demonstrate some important performance and scalability properties of the approach. For instance, in real systems we have little control over the number of distinct events used in the traces and thus cannot control the alphabet size. We also have little control of the exact length of the traces in real systems.
 
-\noindent \textbf{Setting 1:}
-In Setting 1, the total number of events in execution traces were varied. The number of distinct events was set to 4, and the number of variables in TRE templates is set to 2. The details of four TRE templates, used in this experiment, are provided further in this section. The total number of events in execution traces were varied exponentially. As shown in Figure~\ref{fig:plot1}, the x axis shows the total number of events in execution traces, and the y axis shows the average overhead of our mining algorithm in terms of execution time. We note that we begin to measure the overhead of our algorithm when individual events are processed in the loop . Thus, the measurement does not include the initialization part of the algorithm whose overhead is constant. As shown in Figure~\ref{fig:plot1}, the overhead of our mining algorithms grows linearly w.r.t. the total number of events in a execution trace. For example, the average execution time is 170 milliseconds for processing 0.1 million events.
 
-\noindent \textbf{Setting 2:}
-In Setting 2, the number of distinct events is varied. There were 10,000 events in each execution trace, and the number of variables in TRE templates were set to 2. As shown in Figure~\ref{fig:plot2}, the x axis shows the number of distinct events in execution traces. The y axis reports the execution time of the mining algorithm. As seen, the overhead increases exponentially. The average overhead for processing a trace of 10,000 events with 25 distinct events is 594 milliseconds.
+We synthesized a set of traces by varying the following three parameters: the distinct number of events, the total number of events, and the number of variables in TRE templates. We used the TRE property patterns listed in Table~\ref{TRE_Exp}.
+Below we will describe the setup for evaluating the performance of our mining algorithm.
 
-We used the following TRE templates for Setting 1 and Setting 2.
+\vspace{3mm}
+
+\noindent \textbf{Setup and Results:} We performed the experiment under three different setups. In each of the setups, the value of one of the tree parameters was varied. The values of others were kept constant. We executed each experiment 10 times.
+
+\vspace{3mm}
+
+\noindent \textbf{TRE Templates:} The following four TRE templates are used for the evaluation in our setups. These are the first four TRE property patterns listed in Table~\ref{TRE_Exp} and parametrized with a time interval of 0 to 2,000.
+\vspace{2mm}
 
 \noindent \textbf{T-1 (response)}: $(\verb!^!P)^*.((\langle P.(\verb!^!S)^*.S\rangle[0, 2000]).(\verb!^!P)^*$
 
@@ -315,18 +322,60 @@ We used the following TRE templates for Setting 1 and Setting 2.
 
 \noindent \textbf{T-4 (multi-cause)}: $(\verb!^!P,S)^*.((\langle P.(\verb!^!S)^*.S\rangle[0, 2000]).(\verb!^!P,S)^*$
 
-\noindent \textbf{Setting 3:}
-In Setting 3, we varied the number of parameters in TRE templates. The total number of events in execution traces were set constant at 10,000, and the number of distinct events was set to 10. Figure~\ref{fig:plot3} shows the variation in the average overhead w.r.t. the number of variables in TRE templates. As shown, the average overhead grows exponentially. The average overhead for processing an execution trace of 10,000 events with 10 distinct events with a TRE template containing 4 variables is 4156 milliseconds. For this setting, we used TRE templates with different number of variables, which are similar to the TRE templates used for Setting 1 and Setting 2. For the sake of brevity, we do not list these TRE templates.
 
-The experimental results confirm the asymptotic analysis of our algorithm's complexity, which is described in previous sections.
+\vspace{3mm}
 
-We also compared the performance of Algorithm 1 and Algorithm 2 over synthesized traces. The size of the execution trace for this experiment was 50,000, and 30 distinct types of events were used. The following TRE templates were provided as an input to the algorithms.
+\noindent \textbf{Setup 1:}
+In this first setup, we varied the total number of events in the traces. The number of distinct events was set to 4, and the number of variables in TRE templates was set to 2. The total number of events in the traces were varied exponentially.
+
+The results are shown in Figure~\ref{fig:plot1}. The x axis represents the total number of events in the traces, and the y axis represents the average execution time of our mining algorithm. Note that the measurement of the execution time includes only the processing of trace events (within the main loop of Algorithm~\ref{alg:the_alg}). The measurement does not include the initialization of the algorithm, the overhead of which is constant.
+
+As shown in Figure~\ref{fig:plot1}, the executuon of our mining algorithms grows linearly w.r.t. the total number of events in the trace. For example, the average execution time is 170 milliseconds for processing 0.1 million events.
+
+\vspace{3mm}
+
+\noindent \textbf{Setup 2:}
+In this setup, we varied the number of distinct events. There were 10,000 events in total in each trace, and the number of variables in TRE templates was set to 2. As shown in Figure~\ref{fig:plot2}, the x axis represents the number of distinct events in the traces, and the y axis represents the average execution time of our mining algorithm. The figure shows that the execution time increases exponentially with the growing number of distinct events. The average execution time for processing a trace of 10,000 events with 25 distinct events is 594 milliseconds.
+
+\vspace{3mm}
+
+\noindent \textbf{Setup 3:}
+Lastly, in this setup, we varied the number of parameters in the TRE templates. The total number of events in the traces was set to 10,000, and the number of distinct events was set to 10. For this setup, the four TRE templates used for setup 1 and 2 were varied to include different numners of event variables. For the sake of brevity, we do not list these TRE templates.
+
+Figure~\ref{fig:plot3} shows the variation in the average execution time w.r.t. the number of variables in the TRE templates.
+It is evident that the average execution time grows exponentially. The average time for processing a trace of 10,000 events with 10 distinct events and a TRE template containing 4 variables is 4156 milliseconds.
+
+
+\subsection{Comparing Algorithm Performance}
+
+Next, we compared the performance of Algorithm 1 and Algorithm 2, where Algorithm 1 considers TRE templates with negation and Algorithm 2 considers TRE templates \emph{without} negation. The TRE templates listed in Table~\ref{Algs_synth} were provided as input to the two algorithms.
+
+Figure~\ref{fig:plot5} shows the results of the algorithm comparison on real traces generated from a QNX system. The trace used for the evaluation contained 1 million events, with 205 distinct events. It is evident from the figure that mining properties with negation takes approximately 100 times longer than mining properties without negation. This corresponds to the expected speedup of $\frac{\Sigma}{p}$ (see the Discussion section), which in this case is $\frac{205}{2}$.
+
+Figure~\ref{fig:plot6} shows the results of the algorithm comparison on real traces generated from a CAN network. The trace used for the evaluation contained 142,866 events, with 43 distinct events. It is evident from the figure that mining properties with negation takes approximately 21.5 times longer than mining properties without negation. This corresponds to the expected speedup of $\frac{\Sigma}{p}$ (see the Discussion section), which in this case is $\frac{43}{2}$.
+
+Lastly, Figure~\ref{fig:plot4} shows the results of the comparison on a synthesized trace. The size of the trace used for this experiment was 50,000 events, with 30 distinct events.
+\todo[inline]{GC: What are the exact results values? Not clear from the graph.}
+
+% 1) QNX
+% Trace Properties:
+% Trace Length - 1 million events
+% Alphabet Length = 205
+% Place Holders in TRE = 2
+% Expected Speed up = 205/2 = Approx 100 times as is clear in the plot attached
+
+% 2) CAN
+% Trace Properties:
+% Trace Length - 142,866 events
+% Alphabet Length = 43
+% Place Holders in TRE = 2
+% Expected Speed up = 43/2 = Approx 21.5 times as is clear in the plot attached
 
 \begin{table*}[t]
 	\centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\textbf{TRE templates for Algorithm 1} & \textbf{TRE templates for Algorithm 2} \\
+		\textbf{TRE Templates for Algorithm 1} & \textbf{TRE Templates for Algorithm 2} \\
 		\hline
 		 $(\langle P.\verb!^!Q^*.Q.\verb!^!R^*.R \rangle [1, 5000])$& $(\langle P.Q.R \rangle [1, 5000])$ \\
 	\end{tabular}
@@ -337,24 +386,36 @@ We also compared the performance of Algorithm 1 and Algorithm 2 over synthesized
 
 \begin{figure*}
   \centering
-  \subfloat[Varying total number of events]{
+  \subfloat[Varying Total Number of Events]{
   \includegraphics[width=\columnwidth]{Plot1.eps}
   \label{fig:plot1}
   }
-  \subfloat[Varying number of distinct events]{
+  \subfloat[Varying Number of Distinct Events]{
   \includegraphics[width=\columnwidth]{Plot2.eps}
   \label{fig:plot2}
   }\\
-  \subfloat[Varying number of variables in TRE templates]{
+  \subfloat[Varying Number of Variables in TRE Templates]{
   \includegraphics[width=\columnwidth]{Plot3.eps}
   \label{fig:plot3}
   }
-  \subfloat[Comparing Overhead of Mining Different Classes of TRE templates]{
+  \subfloat[Comparing Execution of Mining Different Classes of TRE templates]{
   \includegraphics[width=\columnwidth]{Plot4.eps}
   \label{fig:plot4}}
-  \caption{Results on Synthesized Traces}
+  \caption{Results on Synthesized Traces}\label{Algs_synth}
 \end{figure*}
 
+\begin{figure*}
+  \centering
+  \subfloat[Comparing Execution on QNX Traces]{
+  \includegraphics[width=\columnwidth]{QNX_Class_ls.eps}
+  \label{fig:plot5}
+  }
+  \subfloat[Comparing Execution on CAN Traces]{
+  \includegraphics[width=\columnwidth]{CAN_Class_ns.eps}
+  \label{fig:plot6}
+  }
+  \caption{Results on Real System Traces}\label{Algs_real}
+\end{figure*}
 
 \section{Discussion} \label{discussion}
 
@@ -421,7 +482,7 @@ Finally, the technique is scalable with the growing values of $\Sigma$ and $p$ a
 
 \section{Conclusion}
 
-TBD
+The experimental results confirm the asymptotic analysis of our algorithm's complexity, which is described in previous sections.
 
 
 %\bibliographystyle{abbrv}
