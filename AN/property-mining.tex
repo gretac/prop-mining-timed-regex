@@ -297,13 +297,18 @@ The implementation is made using a combination of R and C++ and is made availabl
 
 We developed TRE property pattern variants, such as shown in Table~\ref{TRE_Exp}, of commonly used patterns of QREs ~\cite{DBLP:conf/paste/YangE04}. By using these TRE variants as TRE templates, we mined TRE instances from real-world system traces: QNX tracelogger and controller area network (CAN) communication traces. We used different thresholds for \emph{support} and \emph{confidence} to uncover interesting TRE instances. Further, to demonstrate the performance and scalability of our approach, we synthesized traces for different configurations w.r.t. the length of traces, number of variables in a TRE template, and the number of distinct events in traces. For the experiments, we used a single eight core machine equipped with the Intel i7-3820 CPU at 3.60GHz and 31.4Gb of RAM. The machine runs Ubuntu 14.04 LTS 64 bit.
 
+\subsection{Performance Evaluation using Real Traces}
+
+% short description of the traces used for the evaluation
+
+
 \subsection{Performance Evaluation using Synthesized Traces}
 
 Real system traces are suitable for testing the feasibility and usefullness of our proposed technique. However, they cannot be easily used to demonstrate some important performance and scalability properties of the approach. For instance, in real systems we have little control over the number of distinct events used in the traces and thus cannot control the alphabet size. We also have little control of the exact length of the traces in real systems.
 
 
-We synthesized a set of traces by varying the following three parameters: the distinct number of events, the total number of events, and the number of variables in TRE templates. We used the TRE property patterns listed in Table~\ref{TRE_Exp}.
-Below we will describe the setup for evaluating the performance of our mining algorithm.
+We synthesized a set of traces by varying the following three parameters: the distinct number of events (the size of the events alphabet $\Sigma$), the total number of events (length $L$ of the traces), and the number of variables in TRE templates ($p$ event variables). We used the TRE property patterns listed in Table~\ref{TRE_Exp}.
+Below we will describe each setup for evaluating the performance of our mining algorithm, as well as will present the associated results.
 
 \vspace{3mm}
 
@@ -340,10 +345,30 @@ In this setup, we varied the number of distinct events. There were 10,000 events
 \vspace{3mm}
 
 \noindent \textbf{Setup 3:}
-Lastly, in this setup, we varied the number of parameters in the TRE templates. The total number of events in the traces was set to 10,000, and the number of distinct events was set to 10. For this setup, the four TRE templates used for setup 1 and 2 were varied to include different numners of event variables. For the sake of brevity, we do not list these TRE templates.
+Lastly, in this setup, we varied the number of event variables in the TRE templates. The total number of events in the traces was set to 10,000, and the number of distinct events was set to 10. For this setup, the four TRE templates used for setup 1 and 2 were varied to include different numbers of event variables. For the sake of brevity, we do not list these TRE templates.
 
 Figure~\ref{fig:plot3} shows the variation in the average execution time w.r.t. the number of variables in the TRE templates.
 It is evident that the average execution time grows exponentially. The average time for processing a trace of 10,000 events with 10 distinct events and a TRE template containing 4 variables is 4156 milliseconds.
+
+\begin{figure*}[!ht]
+  \centering
+  \subfloat[Varying Total Number of Events]{
+  \includegraphics[width=\columnwidth]{Plot1.eps}
+  \label{fig:plot1}
+  }
+  \subfloat[Varying Number of Distinct Events]{
+  \includegraphics[width=\columnwidth]{Plot2.eps}
+  \label{fig:plot2}
+  }\\
+  \subfloat[Varying Number of Variables in TRE Templates]{
+  \includegraphics[width=\columnwidth]{Plot3.eps}
+  \label{fig:plot3}
+  }
+  \subfloat[Comparing Execution of Mining Different Classes of TRE templates]{
+  \includegraphics[width=\columnwidth]{TRESyn.eps}
+  \label{fig:plot4}}
+  \caption{Results on Synthesized Traces}\label{Algs_synth}
+\end{figure*}
 
 
 \subsection{Comparing Algorithm Performance}
@@ -352,10 +377,9 @@ Next, we compared the performance of Algorithm 1 and Algorithm 2, where Algorith
 
 Figure~\ref{fig:plot5} shows the results of the algorithm comparison on real traces generated from a QNX system. The trace used for the evaluation contained 1 million events, with 205 distinct events. It is evident from the figure that mining properties with negation takes approximately 100 times longer than mining properties without negation. This corresponds to the expected speedup of $\frac{\Sigma}{p}$ (see the Discussion section), which in this case is $\frac{205}{2}$.
 
-Figure~\ref{fig:plot6} shows the results of the algorithm comparison on real traces generated from a CAN network. The trace used for the evaluation contained 142,866 events, with 43 distinct events. It is evident from the figure that mining properties with negation takes approximately 21.5 times longer than mining properties without negation. This corresponds to the expected speedup of $\frac{\Sigma}{p}$ (see the Discussion section), which in this case is $\frac{43}{2}$.
+Figure~\ref{fig:plot6} shows the results of the algorithm comparison on real traces generated from a CAN network. The trace used for the evaluation contained 142,866 events, with 43 distinct events. Again, the figure clearly demonstrates that mining properties with negation takes longer than mining properties without negation, in this case 21.5 times longer. This corresponds to the expected speedup of $\frac{43}{2}$.
 
-Lastly, Figure~\ref{fig:plot4} shows the results of the comparison on a synthesized trace. The size of the trace used for this experiment was 50,000 events, with 30 distinct events.
-\todo[inline]{GC: What are the exact results values? Not clear from the graph.}
+Lastly, Figure~\ref{fig:plot4} shows the results of the comparison on a synthesized trace. The size of the trace used for this experiment was 50,000 events, with 30 distinct events. It is evident from the figure that mining properties with negation takes approximately 12 times longer than mining properties without negation. This result also closely approaches the expected speedup of $\frac{\Sigma}{p}$ (see the Discussion section), which in this case is $\frac{30}{2}$.
 
 % 1) QNX
 % Trace Properties:
@@ -371,7 +395,7 @@ Lastly, Figure~\ref{fig:plot4} shows the results of the comparison on a synthesi
 % Place Holders in TRE = 2
 % Expected Speed up = 43/2 = Approx 21.5 times as is clear in the plot attached
 
-\begin{table*}[t]
+\begin{table*}[!ht]
 	\centering
 	\begin{tabular}{|l|l|}
 		\hline
@@ -384,27 +408,8 @@ Lastly, Figure~\ref{fig:plot4} shows the results of the comparison on a synthesi
 	\label{miningOverhead}
 \end{table*}
 
-\begin{figure*}
-  \centering
-  \subfloat[Varying Total Number of Events]{
-  \includegraphics[width=\columnwidth]{Plot1.eps}
-  \label{fig:plot1}
-  }
-  \subfloat[Varying Number of Distinct Events]{
-  \includegraphics[width=\columnwidth]{Plot2.eps}
-  \label{fig:plot2}
-  }\\
-  \subfloat[Varying Number of Variables in TRE Templates]{
-  \includegraphics[width=\columnwidth]{Plot3.eps}
-  \label{fig:plot3}
-  }
-  \subfloat[Comparing Execution of Mining Different Classes of TRE templates]{
-  \includegraphics[width=\columnwidth]{Plot4.eps}
-  \label{fig:plot4}}
-  \caption{Results on Synthesized Traces}\label{Algs_synth}
-\end{figure*}
 
-\begin{figure*}
+\begin{figure*}[!ht]
   \centering
   \subfloat[Comparing Execution on QNX Traces]{
   \includegraphics[width=\columnwidth]{QNX_Class_ls.eps}
