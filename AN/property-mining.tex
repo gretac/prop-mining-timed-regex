@@ -24,6 +24,8 @@
 \usepackage{hyperref}
 \usepackage{tikz}
 \usepackage{subfig,epstopdf, todonotes}
+\usepackage{makecell}
+\usepackage{diagbox}
 \usetikzlibrary{automata,positioning}
 %\usepackage{amsmath,amsfonts,amssymb,mathtools,url,cite,xspace,graphicx,color,stmaryrd,multirow,verbatim,listings,tikz,pspicture,epstopdf,algorithm,listings,algorithmicx,algorithm,caption,todonotes,algpseudocode}
 \hypersetup{
@@ -300,12 +302,183 @@ In this Section, we demonstrate the performance and scalability of our approach 
 
 The implementation is made using a combination of R and C++ and is made available as an R package \footnote{\url{https://github.com/gretac/ura.git}}. We use an R package `Rcpp'\footnote{\url{http://www.rcpp.org/}} for integration of R and C++ and make use of C++ internally for better performance. Ragel\footnote{\url{http://www.colm.net/open-source/ragel/}} is a framework we used to synthesize Timed Automata for TREs.
 
-We developed TRE property pattern variants, such as shown in Table~\ref{TRE_Exp}, of commonly used patterns of QREs ~\cite{DBLP:conf/paste/YangE04}. By using these TRE variants as TRE templates, we mined TRE instances from real-world system traces: QNX tracelogger and controller area network (CAN) communication traces. We used different thresholds for \emph{support} and \emph{confidence} to uncover interesting TRE instances. Further, to demonstrate the performance and scalability of our approach, we synthesized traces for different configurations w.r.t. the length of traces, number of variables in a TRE template, and the number of distinct events in traces. For the experiments, we used a single eight core machine equipped with the Intel i7-3820 CPU at 3.60GHz and 31.4Gb of RAM. The machine runs Ubuntu 14.04 LTS 64 bit.
+We developed TRE property pattern variants, such as shown in Table~\ref{TRE_Exp}, of commonly used patterns of QREs ~\cite{DBLP:conf/paste/YangE04}. By using these TRE variants as TRE templates, we mined TRE instances from real-world system traces: QNX tracelogger and controller area network (CAN) communication traces. We used different thresholds for \emph{support} and \emph{confidence} to uncover interesting TRE instances. Further, to demonstrate the performance and scalability of our approach, we synthesized traces for different configurations w.r.t. the length of traces, number of variables in a TRE template, and the number of distinct events in traces. For the experiments, we used a single eight core machine equipped with the Intel i7-3820 CPU at 3.60 GHz and 31.4 Gb of RAM. The machine runs Ubuntu 14.04 LTS 64 bit.
 
-\subsection{Performance Evaluation using Real Traces}
+\subsection{TRE Templates}
+The following four TRE templates are used for the evaluation of both real and synthetic traces. These are the first four TRE property patterns listed in Table~\ref{TRE_Exp} and parametrized with a time interval of 0 to 2,000.
+\vspace{2mm}
+
+\noindent \textbf{T-1 (response)}: $(\verb!^!P)^*.((\langle P.(\verb!^!S)^*.S\rangle[0, 2000]).(\verb!^!P)^*$
+
+\noindent \textbf{T-2 (alternating)}: $(\verb!^!P,S)^*.((\langle P.(\verb!^!P,S)^*.S\rangle[0, 2000]).(\verb!^!P,S)^*$
+
+\noindent \textbf{T-3 (multi-effect)}: $(\verb!^!P,S)^*.((\langle P.(\verb!^!P,S)^*.S\rangle[0, 2000]).(\verb!^!P)^*$
+
+\noindent \textbf{T-4 (multi-cause)}: $(\verb!^!P,S)^*.((\langle P.(\verb!^!S)^*.S\rangle[0, 2000]).(\verb!^!P,S)^*$
+
+
+\subsection{Performance Evaluation using Real QNX Traces}
 
 % short description of the traces used for the evaluation
+QNX is a real time operating system (RTOS) runing in many safety critical systems, such as medical devices, nuclear monitoring systems, vehicles, etc. One strength of the QNX RTOS is its advanced logging facility \emph{tracelogger}. Tracelogger facilitates detailed tracing of kernel and user activity on the system. More specifically, it can log interrupt activity, various states of processes and threads, communication within the system, kernel calls, custom user space events, and much more. The logged events give a detailed view into the behavior of the system, but due to the quantity of the produced information are often difficult to make use of by developers. The traces are a perfect resource for dynamic mining of system properties and specifications.
 
+% Talk about the goals of this portion of the evaluation
+For the evaluation we used a set of traces produced on a hexacopter that is running the QNX RTOS and a user control process. Of interest in this portion of the evaluation are the optimal thresholds for support and confidence that would produce a minimal dominant set of specifications that can be assessed by the developers or system designers.
+
+
+% Talk about the results
+Table~\ref{TRE-QNX} presents average number of specifications mined from a set of 10 hexacopter QNX traces using varying values of support and confidence. TRE T-1, the response property, generally occurs more often in the trace. Due to abundance of inter-process communication and system calls within the kernel, this is expected. THe other three TREs are more complex and thus seem to occur less often across the traces. It is evident that the higher the threshold values for both metrics, the smaller the number of reported specifications. We will assume that ideally a developer or engineer would assess around 30 specifications, more than that would be abundant. Based on the results, the support threshold should be kept around 10,000 to 20,000 and the confidence threshold should be kept above 0.7.
+
+\begin{table}[ht]
+  \centering
+  \subfloat[Results of Mining TRE T-1]{
+    \begin{tabular}{|l|c|c|c|c|c|}
+      \hline
+      \theadfont\diagbox[width=10em]{Support}{Confidence} & \textbf{1} & \textbf{0.9} & \textbf{0.8} & \textbf{0.7} & \textbf{0.6} \\
+      \hline
+        1 - 1,000         & 0 & 194 & 275 & 324 & 363\\
+        1,000 - 2,000     & 0 & 173 & 227 & 252 & 265\\
+        2,000 - 5,000     & 0 & 137 & 157 & 170 & 174\\
+        5,000 - 10,000    & 0 &  91 &  95 &  98 & 100\\
+        10,000 - 20,000   & 0 &  52 &  52 &  54 &  54\\
+        20,000 - 40,000   & 0 &  26 &  26 &  27 &  27\\
+        40,000 - 80,000   & 0 &  15 &  15 &  16 &  16\\
+        80,000 - 300,000  & 0 &   3 &   3 &   3 &   3\\
+      \hline
+    \end{tabular}
+  }
+
+  \subfloat[Results of Mining TRE T-2]{
+    \begin{tabular}{|l|c|c|c|c|c|}
+      \hline
+      \theadfont\diagbox[width=10em]{Support}{Confidence} & \textbf{1} & \textbf{0.9} & \textbf{0.8} & \textbf{0.7} & \textbf{0.6} \\
+      \hline
+        1 - 1,000         & 0 & 30 & 36 & 41 & 45\\
+        1,000 - 2,000     & 0 & 30 & 35 & 39 & 39\\
+        2,000 - 5,000     & 0 & 25 & 29 & 33 & 33\\
+        5,000 - 10,000    & 0 & 22 & 25 & 28 & 28\\
+        10,000 - 20,000   & 0 & 20 & 20 & 23 & 23\\
+        20,000 - 40,000   & 0 & 18 & 18 & 20 & 20\\
+        40,000 - 80,000   & 0 & 10 & 10 & 11 & 11\\
+        80,000 - 300,000  & 0 &  2 &  2 &  2 &  2\\
+      \hline
+    \end{tabular}
+  }
+
+  \subfloat[Results of Mining TRE T-3]{
+    \begin{tabular}{|l|c|c|c|c|c|}
+      \hline
+      \theadfont\diagbox[width=10em]{Support}{Confidence} & \textbf{1} & \textbf{0.9} & \textbf{0.8} & \textbf{0.7} & \textbf{0.6} \\
+      \hline
+        1 - 1,000         & 0 & 38 & 52 & 67 & 72\\
+        1,000 - 2,000     & 0 & 38 & 51 & 65 & 70\\
+        2,000 - 5,000     & 0 & 33 & 44 & 55 & 58\\
+        5,000 - 10,000    & 0 & 30 & 40 & 50 & 53\\
+        10,000 - 20,000   & 0 & 52 & 52 & 54 & 54\\
+        20,000 - 40,000   & 0 & 26 & 26 & 27 & 27\\
+        40,000 - 80,000   & 0 & 14 & 14 & 16 & 16\\
+        80,000 - 300,000  & 0 &  3 &  3 &  3 &  3\\
+      \hline
+    \end{tabular}
+  }
+
+  \subfloat[Results of Mining TRE T-4]{
+    \begin{tabular}{|l|c|c|c|c|c|}
+      \hline
+      \theadfont\diagbox[width=10em]{Support}{Confidence} & \textbf{1} & \textbf{0.9} & \textbf{0.8} & \textbf{0.7} & \textbf{0.6} \\
+      \hline
+        1 - 1,000         & 0 & 30 & 38 & 45 & 49\\
+        1,000 - 2,000     & 0 & 30 & 37 & 42 & 45\\
+        2,000 - 5,000     & 0 & 25 & 32 & 36 & 38\\
+        5,000 - 10,000    & 0 & 22 & 25 & 29 & 31\\
+        10,000 - 20,000   & 0 & 20 & 21 & 24 & 24\\
+        20,000 - 40,000   & 0 & 18 & 19 & 20 & 20\\
+        40,000 - 80,000   & 0 & 10 & 10 & 11 & 11\\
+        80,000 - 300,000  & 0 &  2 &  2 &  2 &  2\\
+      \hline
+    \end{tabular}
+  }
+  \caption{Mining TREs on QNX Traces} \label{TRE-QNX}
+\end{table}
+
+
+
+\subsection{Performance Evaluation using Real CAN Traces}
+
+% short description of the traces used for the evaluation
+Controller area network (CAN) bus is the primary communication medium over which the electrical control units (ECU) within a vehicle exchange commands and information. Each message on the network has an associated ID, which is unique per message type. So, fo instance, all messages that contain vehile speed will always be broadcasted on the network with a unique and unchanging message ID. Messages transmitted on the network have an associated timestamp. The actual content of the messages are encoded in a manufacturer specific way. Our interest lies in the transmitted messages and their IDs, and not in the exact content of the message.
+
+
+% Talk about the goals of this portion of the evaluation
+For the evaluation we collected a set of traces of CAN network activity produced from a vehicle in different driving conditions. For instance, we collected trace files when the vehicle was idle, with the engine on/off, driving, turning, etc. Of interest in this portion of the evaluation are the optimal thresholds for support and confidence that would produce a minimal dominant set of specifications that can be assessed by system designers.
+
+
+% Talk about the results
+Table~\ref{TRE-CAN} presents average number of specifications mined from a set of 10 CAN traces using varying values of support and confidence.
+
+\begin{table}[ht]
+  \centering
+  \subfloat[Results of Mining TRE T-1]{
+    \begin{tabular}{|l|c|c|c|c|c|}
+      \hline
+      \theadfont\diagbox[width=10em]{Support}{Confidence} & \textbf{1} & \textbf{0.9} & \textbf{0.8} & \textbf{0.7} & \textbf{0.6} \\
+      \hline
+        1 - 1,000           & 27 & 596 & 694 & 696 & 696\\
+        1,000 - 5,000       & 27 & 518 & 548 & 548 & 548\\
+        5,000 - 10,000      & 27 & 479 & 508 & 508 & 508\\
+        10,000 - 50,000     & 27 & 343 & 357 & 357 & 357\\
+        50,000 - 80,000     & 27 & 100 & 100 & 100 & 100\\
+        80,000 - 150,000    &  1 &   1 &   1 &   1 &   1\\
+      \hline
+    \end{tabular}
+  }
+
+  \subfloat[Results of Mining TRE T-2]{
+    \begin{tabular}{|l|c|c|c|c|c|}
+      \hline
+      \theadfont\diagbox[width=10em]{Support}{Confidence} & \textbf{1} & \textbf{0.9} & \textbf{0.8} & \textbf{0.7} & \textbf{0.6} \\
+      \hline
+        1 - 1,000           & 9 & 118 & 210 & 286 & 330\\
+        1,000 - 5,000       & 7 &  41 &  56 & 103 & 115\\
+        5,000 - 10,000      & 7 &  34 &  47 &  92 & 102\\
+        10,000 - 50,000     & 7 &  34 &  41 &  66 &  70\\
+        50,000 - 80,000     & 7 &  30 &  30 &  30 &  30\\
+        80,000 - 150,000    &  1 &  1 &   1 &   1 &   1\\
+      \hline
+    \end{tabular}
+  }
+
+  \subfloat[Results of Mining TRE T-3]{
+    \begin{tabular}{|l|c|c|c|c|c|}
+      \hline
+      \theadfont\diagbox[width=10em]{Support}{Confidence} & \textbf{1} & \textbf{0.9} & \textbf{0.8} & \textbf{0.7} & \textbf{0.6} \\
+      \hline
+        1 - 1,000           & 15 & 256 & 613 & 711 & 738\\
+        1,000 - 5,000       & 15 & 220 & 478 & 557 & 566\\
+        5,000 - 10,000      & 15 & 204 & 439 & 516 & 523\\
+        10,000 - 50,000     & 15 & 202 & 327 & 361 & 364\\
+        50,000 - 80,000     & 15 & 100 & 100 & 100 & 100\\
+        80,000 - 150,000    &  1 &   1 &   1 &   1 &   1\\
+      \hline
+    \end{tabular}
+  }
+
+  \subfloat[Results of Mining TRE T-4]{
+    \begin{tabular}{|l|c|c|c|c|c|}
+      \hline
+      \theadfont\diagbox[width=10em]{Support}{Confidence} & \textbf{1} & \textbf{0.9} & \textbf{0.8} & \textbf{0.7} & \textbf{0.6} \\
+      \hline
+        1 - 1,000           & 8 & 85 & 194 & 255 & 288\\
+        1,000 - 5,000       & 7 & 41 &  55 &  87 &  96\\
+        5,000 - 10,000      & 7 & 34 &  47 &  78 &  87\\
+        10,000 - 50,000     & 7 & 34 &  41 &  59 &  63\\
+        50,000 - 80,000     & 7 & 30 &  30 &  30 &  30\\
+        80,000 - 150,000    & 1 &  1 &   1 &   1 &   1\\
+      \hline
+    \end{tabular}
+  }
+  \caption{Mining TREs on CAN Traces} \label{TRE-CAN}
+\end{table}
 
 \subsection{Performance Evaluation using Synthesized Traces}
 
@@ -318,19 +491,6 @@ Below we will describe each setup for evaluating the performance of our mining a
 \vspace{3mm}
 
 \noindent \textbf{Setup and Results:} We performed the experiment under three different setups. In each of the setups, the value of one of the tree parameters was varied. The values of others were kept constant. We executed each experiment 10 times.
-
-\vspace{3mm}
-
-\noindent \textbf{TRE Templates:} The following four TRE templates are used for the evaluation in our setups. These are the first four TRE property patterns listed in Table~\ref{TRE_Exp} and parametrized with a time interval of 0 to 2,000.
-\vspace{2mm}
-
-\noindent \textbf{T-1 (response)}: $(\verb!^!P)^*.((\langle P.(\verb!^!S)^*.S\rangle[0, 2000]).(\verb!^!P)^*$
-
-\noindent \textbf{T-2 (alternating)}: $(\verb!^!P,S)^*.((\langle P.(\verb!^!P,S)^*.S\rangle[0, 2000]).(\verb!^!P,S)^*$
-
-\noindent \textbf{T-3 (multi-effect)}: $(\verb!^!P,S)^*.((\langle P.(\verb!^!P,S)^*.S\rangle[0, 2000]).(\verb!^!P)^*$
-
-\noindent \textbf{T-4 (multi-cause)}: $(\verb!^!P,S)^*.((\langle P.(\verb!^!S)^*.S\rangle[0, 2000]).(\verb!^!P,S)^*$
 
 
 \vspace{3mm}
