@@ -255,7 +255,7 @@ An intuitive way to evaluate a TRE on a system execution trace is to recursively
 Below, in Algorithm ~\ref{alg:the_alg}, is a detailed description of the above steps in form of pseudo code.
 
 \begin{algorithm}[h]
-    \caption{Timed Regular Expression Mining}\label{alg:the_alg}
+    \caption{Timed Regular Expression Mining without Negation}\label{alg:the_alg}
     \begin{algorithmic}[1]
      \Require  Given a set of traces with unique event \emph{i} and a TRE pattern
      \Ensure Parse TRE and formulate a finite Timed Automaton $\rightarrow$ A
@@ -271,7 +271,30 @@ Below, in Algorithm ~\ref{alg:the_alg}, is a detailed description of the above s
     \end{algorithmic}
 \end{algorithm}
 
-In Algorithm ~\ref{alg:the_alg}, $\Sigma$ is the events alphabet and $p$ is the number of event variables in the TRE template. $A$ denotes the timed automaton and $FS$ and $ES$ denote the final and error states of the timed automaton respectively. $S$ and $C$ denote the \emph{support} and \emph{confidence} metrics of the TRE instances on the given trace.
+
+\begin{algorithm}[h]
+    \caption{Timed Regular Expression Mining with Negation}\label{alg:the_alg_neg}
+    \begin{algorithmic}[1]
+     \Require  Given a set of traces with unique event \emph{i} and a TRE pattern
+     \Ensure Parse TRE and formulate a finite Timed Automaton $\rightarrow$ A
+     \State Initialize the incidence matrix of size $\Sigma^p$
+     \State Initialize the \emph{success} and \emph{reset} counters for all permutations
+     \For {(each possible permutation)}
+     \For {(each unique event $i$ from the trace)}
+        \State Process the complete trace;
+        \State Update the success if A $\rightarrow$ FS;
+        \State Update the reset if A $\rightarrow$ ES;
+     \EndFor
+     \EndFor
+     \State Evaluate Support - S
+     \State Evaluate Confidence - C
+    \end{algorithmic}
+\end{algorithm}
+
+In Algorithm ~\ref{alg:the_alg}, $\Sigma$ is the events alphabet and $p$ is the number of event variables in the TRE template which do not have negation. $A$ denotes the timed automaton and $FS$ and $ES$ denote the final and error states of the timed automaton respectively. $S$ and $C$ denote the \emph{support} and \emph{confidence} metrics of the TRE instances on the given trace.
+
+In contrast, the algorithm ~\ref{alg:the_alg_neg} evaluates the TREs with negations and has an additional for loop to iterate over all possible permutations.
+
 
 \subsection{Temporal Property Patterns}
 

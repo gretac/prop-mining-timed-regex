@@ -1,0 +1,36 @@
+\begin{algorithm}[h]
+    \caption{Timed Regular Expression Mining without Negation}\label{alg:alg_without_neg}
+    \begin{algorithmic}[1]
+     \Require  Given a set of traces with unique event \emph{i} and a TRE pattern
+     \Ensure Parse TRE and formulate a finite Timed Automaton $\rightarrow$ A
+     \State Initialize the incidence matrix of size $\Sigma^p$
+     \State Initialize the \emph{success} and \emph{reset} counters for all permutations
+     \For {(each unique event $i$ from the trace)}
+        \State Update the automata state for event $i$;
+        \State Update the success if A $\rightarrow$ FS;
+        \State Update the reset if A $\rightarrow$ ES;
+     \EndFor
+     \State Evaluate Support - S
+     \State Evaluate Confidence - C
+    \end{algorithmic}
+\end{algorithm}
+
+
+\begin{algorithm}[h]
+    \caption{Timed Regular Expression Mining with Negation}\label{alg:alg_neg}
+    \begin{algorithmic}[1]
+     \Require  Given a set of traces with unique event \emph{i} and a TRE pattern
+     \Ensure Parse TRE and formulate a finite Timed Automaton $\rightarrow$ A
+     \State Initialize the incidence matrix of size $\Sigma^p$
+     \State Initialize the \emph{success} and \emph{reset} counters for all permutations
+     \For {(each possible permutation)}
+     \For {(each permutation with event $i$)}
+        \State Update the automata state for event $i$;
+        \State Update the success if A $\rightarrow$ FS;
+        \State Update the reset if A $\rightarrow$ ES;
+	 \EndFor
+     \EndFor
+     \State Evaluate Support - S
+     \State Evaluate Confidence - C
+    \end{algorithmic}
+\end{algorithm}

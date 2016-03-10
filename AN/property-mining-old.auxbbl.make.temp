@@ -1,0 +1,68 @@
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Timed Regular Expression Mining\relax }}{4}{algorithm.1}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Timed Automata from a Timed Regular Expression\relax }}{3}{figure.caption.2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Property Mining Workflow\relax }}{3}{figure.caption.3}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces TRE Property Patterns\relax }}{4}{table.caption.4}}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Background}{2}{section.2}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Approach}{3}{section.3}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Discussion}{4}{section.4}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Conclusion}{5}{section.5}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Timed Regular Expressions}{2}{subsection.2.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Timed Automata}{2}{subsection.2.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Dominant Properties}{3}{subsection.2.3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Using Timed Automata as Acceptors}{4}{subsection.4.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Memory Requirements}{4}{subsection.4.2}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.1}CPU Requirements}{4}{subsubsection.4.2.1}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2}Optimality}{4}{subsubsection.4.2.2}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.3}Scaling the Approach}{4}{subsubsection.4.2.3}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\bibdata{refs}
+\bibstyle{plainnat}
+\citation{AD94}
+\citation{Alur1990,Alur1994183}
+\citation{Alur1994183}
+\citation{CAN}
+\citation{DBLP:conf/popl/AmmonsBL02}
+\citation{LPY97}
+\citation{QNX_RTOS}
+\citation{book1}
+\citation{book1}
+\citation{christodorescu2008mining}
+\citation{dallmeier2010generating}
+\citation{dwyer1999patterns,dwyer2}
+\citation{dwyer1999patterns}
+\citation{evans1,dwyer1999patterns}
+\citation{evans1}
+\citation{evans}
+\citation{gabel2010online}
+\citation{kincaid2015automated}
+\citation{lamport1978time,dwyer1999patterns}
+\citation{lemieux2015general}
+\citation{timedregex}
+\citation{timedregex}
+\citation{timedregex}
+\citation{timedregex}
+\citation{timedregex}
+\citation{timedregex}
+\citation{timedregex}
+\citation{timedregex}
+\citation{timedregex}
+\citation{timedregex}
+\fi}
+\fi}
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\global\let\hyper@last\relax 
+\global\let\oldcontentsline\contentsline
+\global\let\oldnewlabel\newlabel
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\providecommand \oddpage@label [2]{}
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\providecommand\hyper@newdestlabel[2]{}
