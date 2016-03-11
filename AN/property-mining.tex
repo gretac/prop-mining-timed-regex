@@ -87,8 +87,8 @@ With the motivation to address the problem of mining specifications with an expl
 We provide two algorithms for mining instances of TREs from their templates. Both algorithms require a TRE template and system traces as input. The algorithms then use the distinct events from the traces to replace the event variables in the TRE templates with actual events. The resultant \emph{permutations} of the template are TRE instances.
 Intuitively, traces are processed against the TRE instances with the help of the timed automaton. Further, we define  \emph{confidence} and \emph{support} as metrics to evaluate the degree to which a TRE instance is satisfied by the traces. The algorithms report only the instances which satisfy the given threshold values of confidence and support.
 
-The first algorithm is designed for TRE templates containing a negation operator. The second algorithm processes TRE templates without a negation operator.
-We later prove that although both algorithms' execution times are exponential in terms of the number of variables in individual TRE templates, the second algorithm generally runs faster than the first by a certain factor, which depends upon the number of distinct events in a trace and the number of variables in a given TRE template. We also prove that our technique is sound, i.e., a mined specification reported by our algorithms actually satisfies the given thresholds of support and confidence on the provided input traces. Also, our technique is complete, i.e., our algorithms report all TRE instances which comply on given traces w.r.t. the thresholds of support and confidence.
+The first algorithm is designed for TRE templates without a negation operator. The second algorithm processes TRE templates with a negation operator.
+We later prove that although both algorithms' execution times are exponential in terms of the number of variables in individual TRE templates, the first algorithm generally runs faster than the second by a certain factor, which depends upon the number of distinct events in a trace and the number of variables in a given TRE template. We also prove that our technique is sound, i.e., a mined specification reported by our algorithms actually satisfies the given thresholds of support and confidence on the provided input traces. Also, our technique is complete, i.e., our algorithms report all TRE instances which comply on given traces w.r.t. the thresholds of support and confidence.
 
 We evaluate our technique on real-world datasets that consist of traces produced by the QNX RTOS ~\cite{QNX_RTOS} during various runs of application software on different hardware platforms. We also evaluate the algorithms on the controller area network (CAN) ~\cite{Davis2007} traces collected from an automobile during different driving phases. We report the performance of our algorithms on the real-life traces in terms of the execution time. We also demonstrate the scalability and efficiency of our approach by running the implementations on synthesized traces of different sizes with different values of parameters such as the number of distinct events, the total number of events in the traces, and the complexity of the TRE templates.
 
@@ -199,11 +199,11 @@ However, these instances contain both interesting and frequently occuring patter
 First, we will only consider properties that are \emph{valid}~\cite{lemieux2015general}. We express that a binding and its corresponding TRE instance are interesting if the TRE instance holds on each trace, thus $100 \%$ valid. We also use the concepts of support and confidence from ~\cite{lemieux2015general}.
 
 \begin{defns}[Support Potential]
-The support of a TRE instance $\pi$ on a trace $t$ is the number of time points of trace $t$ which \emph{could} falsify $pi$.
+The support of a TRE instance $\pi$ on a trace $t$ is the number of time points of trace $t$ which \emph{could} falsify $\pi$.
 \end{defns}
 
 \begin{defns}[Support]
-The support of a TRE instance $\pi$ on a trace $t$ is the number of time points of trace $t$ which could falsify $pi$, but \emph{do not} falsify $pi$.
+The support of a TRE instance $\pi$ on a trace $t$ is the number of time points of trace $t$ which could falsify $\pi$, but \emph{do not} falsify $\pi$.
 \end{defns}
 
 \begin{defns}[Confidence]
@@ -348,9 +348,9 @@ We want to encode the matrix to hold the evaluation results of every TRE instanc
 The dimensionality of the matrix grows proportionally to $p$, the number of symbols in the desired property.
 Complex properties that encode a relationship between a large number of events will result in higehr values of $p$.
 Increasing values of $p$ in tern will result in exponential space growth.
-However, the majority of properties of interest represent relationships among a few events only ~\cite{evans1, dwyer1999patterns}.
+However, the majority of properties of interest represent relationships among a few events only ~\cite{evans1,dwyer1999patterns}.
 Therefore, in general, the dimension $p$ of the matrix will remain small.
-According to the properties listed in ~\cite{dwyer1999patterns, dwyer2}, the typical property will be constrained to 6 events.
+According to the properties listed in ~\cite{dwyer1999patterns}, the typical property will be constrained to 6 events.
 
 The value of $\Sigma$, on the other hand, affects the size of each dimension.
 The number of unique events $\Sigma$ in the trace will depend on the complexity of the program or system.
@@ -725,7 +725,7 @@ It is evident that the average execution time grows exponentially. The average t
 
 \subsection{Comparing Algorithm Performance}
 
-Next, we compared the performance of Algorithm ~\ref{alg:alg_without_neg} and Algorithm ~\ref{alg:alg_neg}, where Algorithm ~\ref{alg:alg_neg} considers TRE templates with negation and Algorithm ~\ref{alg:alg_without_neg} considers TRE templates \emph{without} negation. The TRE templates listed in Table ~\ref{TREs_Syn_Comp} were provided as input to the two algorithms.
+Next, we compared the performance of Algorithm ~\ref{alg:alg_without_neg} and Algorithm ~\ref{alg:alg_neg}, where Algorithm ~\ref{alg:alg_neg} considers TRE templates with negation and Algorithm ~\ref{alg:alg_without_neg} considers TRE templates \emph{without} negation. The TRE templates listed in Table ~\ref{TREs_Syn_Comp} were provided as input to the two algorithms when using synthetically generated traces.
 
 \begin{table}[ht]
 	\centering
@@ -770,6 +770,7 @@ Next, we compared the performance of Algorithm ~\ref{alg:alg_without_neg} and Al
   \label{fig:plot4}
 \end{figure}
 
+For evaluation of real system traces we used the TRE patterns T-1, T-2, T-3 and T-4.
 
 Table~\ref{miningOverhead_time} shows the results of the algorithm comparison on real traces generated from a QNX system. The trace used for the evaluation contained 1 million events, with 205 distinct events. It is evident from the figure that mining properties with negation takes approximately 100 times longer than mining properties without negation. This corresponds to the expected speedup of $\frac{\Sigma}{p}$ (see the Discussion section), which in this case is $\frac{205}{2}$.
 
