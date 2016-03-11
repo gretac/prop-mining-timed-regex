@@ -28,6 +28,7 @@
 \usepackage{diagbox}
 \usepackage{mathtools}
 \usetikzlibrary{automata,positioning}
+
 %\usepackage{amsmath,amsfonts,amssymb,mathtools,url,cite,xspace,graphicx,color,stmaryrd,multirow,verbatim,listings,tikz,pspicture,epstopdf,algorithm,listings,algorithmicx,algorithm,caption,todonotes,algpseudocode}
 \hypersetup{
   colorlinks,
@@ -89,7 +90,7 @@ Intuitively, traces are processed against the TRE instances with the help of the
 The first algorithm is designed for TRE templates containing a negation operator. The second algorithm processes TRE templates without a negation operator.
 We later prove that although both algorithms' execution times are exponential in terms of the number of variables in individual TRE templates, the second algorithm generally runs faster than the first by a certain factor, which depends upon the number of distinct events in a trace and the number of variables in a given TRE template. We also prove that our technique is sound, i.e., a mined specification reported by our algorithms actually satisfies the given thresholds of support and confidence on the provided input traces. Also, our technique is complete, i.e., our algorithms report all TRE instances which comply on given traces w.r.t. the thresholds of support and confidence.
 
-We evaluate our technique on real-world datasets that consist of traces produced by the QNX RTOS ~\cite{QNX_RTOS} during various runs of application software on different hardware platforms. We also evaluate the algorithms on the controller area network (CAN) ~\cite{CAN} traces collected from an automobile during different driving phases. We report the performance of our algorithms on the real-life traces in terms of the execution time. We also demonstrate the scalability and efficiency of our approach by running the implementations on synthesized traces of different sizes with different values of parameters such as the number of distinct events, the total number of events in the traces, and the complexity of the TRE templates.
+We evaluate our technique on real-world datasets that consist of traces produced by the QNX RTOS ~\cite{QNX_RTOS} during various runs of application software on different hardware platforms. We also evaluate the algorithms on the controller area network (CAN) ~\cite{Davis2007} traces collected from an automobile during different driving phases. We report the performance of our algorithms on the real-life traces in terms of the execution time. We also demonstrate the scalability and efficiency of our approach by running the implementations on synthesized traces of different sizes with different values of parameters such as the number of distinct events, the total number of events in the traces, and the complexity of the TRE templates.
 
 The key contributions of this paper involve developing an efficient technique for extracting temporal properties with time constraints in the form of TREs from system traces and evaluating the framework experimentally on industrial real-time systems:
 
@@ -148,7 +149,7 @@ A TRE instance corresponds to a TRE template and has an identical TRE structure.
 
 \subsection{Timed Automata}
 
-Timed automata \cite{AD94} have been investigated quite rigourously in the recent past. The main motivation for using timed automata is their suitability for modeling time-dependent behavior, and the ability to monitor their reachability \cite{LPY97}. Timed automata are equipped with clocks, making them perfect for modelling and verification of real-time systems' behavior \cite{Alur1990, Alur1994183}. Classical models like finite automata, Petri-nets, etc., are not suitable since they cannot express such explicit timing constraints natuarally present in real-life systems. Another important property of the timed automata is that the reachability properties are decidable \cite{Alur1994183}, even though the timed automata have an infinite number of configurations. The main idea behind this result is the construction of a region-automaton, which finitely abstracts the behavior of timed automata in a way that checking reachability in a timed automaton reduces to checking reachability in a finite automaton.
+Timed automata \cite{Alur:1994:TTA:180782.180519} have been investigated quite rigourously in the recent past. The main motivation for using timed automata is their suitability for modeling time-dependent behavior, and the ability to monitor their reachability \cite{LPY97}. Timed automata are equipped with clocks, making them perfect for modelling and verification of real-time systems' behavior \cite{Alur:1994:TTA:180782.180519}. Classical models like finite automata, Petri-nets, etc., are not suitable since they cannot express such explicit timing constraints natuarally present in real-life systems. Another important property of the timed automata is that the reachability properties are decidable \cite{Alur:1994:TTA:180782.180519}, even though the timed automata have an infinite number of configurations. The main idea behind this result is the construction of a region-automaton, which finitely abstracts the behavior of timed automata in a way that checking reachability in a timed automaton reduces to checking reachability in a finite automaton.
 
 \begin{defns}[Timed Automata \cite{timedregex}]
 A timed automaton  $\mathcal{A}$ is a tuple $\langle Q,C,\Delta ,\Sigma, s,F\rangle$ where $Q$ is a finite set of states, $C$ is a finite set of clocks, $\Sigma$ is an input (or event) alphabet, $\Delta$ is a transition relation, $s \in Q$ an initial state and $F \subset Q$ a set of accepting states. The transition relation consists of tuples of the form $\langle q ,\phi ,\rho, a, q' \rangle$ where $q$ and $q'$  are states, $a \in \Sigma \cup \{\epsilon \}$ is a letter, $\rho \subseteq C$ and $\phi$ (the transition guard) is a boolean combination of formulae of the form $(x \in I)$ for some clock $x$ and some integer-bounded interval $I$.
@@ -465,7 +466,7 @@ In this Section, we demonstrate the performance and scalability of our approach 
 
 The implementation is made using a combination of R and C++ and is made available as an R package \footnote{\url{https://github.com/gretac/ura.git}}. We use an R package `Rcpp'\footnote{\url{http://www.rcpp.org/}} for integration of R and C++ and make use of C++ internally for better performance. Ragel\footnote{\url{http://www.colm.net/open-source/ragel/}} is a framework we used to synthesize Timed Automata for TREs.
 
-We developed TRE property pattern variants, such as shown in Table~\ref{TRE_Exp}, of commonly used patterns of QREs ~\cite{DBLP:conf/paste/YangE04}. By using these TRE variants as TRE templates, we mined TRE instances from real-world system traces: QNX tracelogger and controller area network (CAN) communication traces. We used different thresholds for \emph{support} and \emph{confidence} to uncover interesting TRE instances. Further, to demonstrate the performance and scalability of our approach, we synthesized traces for different configurations w.r.t. the length of traces, number of variables in a TRE template, and the number of distinct events in traces. For the experiments, we used a single eight core machine equipped with the Intel i7-3820 CPU at 3.60 GHz and 31.4 Gb of RAM. The machine runs Ubuntu 14.04 LTS 64 bit.
+We developed TRE property pattern variants, such as shown in Table~\ref{TRE_Exp}, of commonly used patterns of QREs ~\cite{evans1}. By using these TRE variants as TRE templates, we mined TRE instances from real-world system traces: QNX tracelogger and controller area network (CAN) communication traces. We used different thresholds for \emph{support} and \emph{confidence} to uncover interesting TRE instances. Further, to demonstrate the performance and scalability of our approach, we synthesized traces for different configurations w.r.t. the length of traces, number of variables in a TRE template, and the number of distinct events in traces. For the experiments, we used a single eight core machine equipped with the Intel i7-3820 CPU at 3.60 GHz and 31.4 Gb of RAM. The machine runs Ubuntu 14.04 LTS 64 bit.
 
 \subsection{TRE Templates}
 The following four TRE templates are used for the evaluation of both real and synthetic traces. These are the first four TRE property patterns listed in Table~\ref{TRE_Exp} and parametrized with a time interval of 0 to 3,000.
@@ -701,33 +702,97 @@ Lastly, in this setup, we varied the number of event variables in the TRE templa
 Figure~\ref{fig:plot3} shows the variation in the average execution time w.r.t. the number of variables in the TRE templates.
 It is evident that the average execution time grows exponentially. The average time for processing a trace of 10,000 events with 10 distinct events and a TRE template containing 4 variables is 4156 milliseconds.
 
-\begin{figure*}[ht]
-  \centering
-  \subfloat[Varying Total Number of Events]{
-  \includegraphics[width=\columnwidth]{Plot1.eps}
-  \label{fig:plot1}
-  }
-  \subfloat[Varying Number of Distinct Events]{
-  \includegraphics[width=\columnwidth]{Plot2.eps}
-  \label{fig:plot2}
-  }\\
-  \subfloat[Varying Number of Variables in TRE Templates]{
-  \includegraphics[width=\columnwidth]{Plot3.eps}
-  \label{fig:plot3}
-  }
-  \subfloat[Comparing Execution of Mining Different Classes of TRE templates]{
-  \includegraphics[width=\columnwidth]{TRESyn.eps}
-  \label{fig:plot4}}
-  \caption{Results on Synthesized Traces}\label{Algs_synth}
-\end{figure*}
+%
+%\begin{figure*}[ht]
+%  \centering
+%  \subfloat[Varying Total Number of Events]{
+%  \includegraphics[width=\columnwidth]{Plot1.eps}
+%  \label{fig:plot1}
+%  }
+%  \subfloat[Varying Number of Distinct Events]{
+%  \includegraphics[width=\columnwidth]{Plot2.eps}
+%  \label{fig:plot2}
+%  }\\
+%  \subfloat[Varying Number of Variables in TRE Templates]{
+%  \includegraphics[width=\columnwidth]{Plot3.eps}
+%  \label{fig:plot3}
+%  }
+%  \subfloat[Comparing Execution of Mining Different Classes of TRE templates]{
+%  \includegraphics[width=\columnwidth]{TRESyn.eps}
+%  \label{fig:plot4}}
+%  \caption{Results on Synthesized Traces}\label{Algs_synth}
+%\end{figure*}
 
 \subsection{Comparing Algorithm Performance}
 
-Next, we compared the performance of Algorithm ~\ref{alg:alg_without_neg} and Algorithm ~\ref{alg:alg_neg}, where Algorithm ~\ref{alg:alg_neg} considers TRE templates with negation and Algorithm ~\ref{alg:alg_without_neg} considers TRE templates \emph{without} negation. The TRE templates listed in Table~\ref{Algs_synth} were provided as input to the two algorithms.
+Next, we compared the performance of Algorithm ~\ref{alg:alg_without_neg} and Algorithm ~\ref{alg:alg_neg}, where Algorithm ~\ref{alg:alg_neg} considers TRE templates with negation and Algorithm ~\ref{alg:alg_without_neg} considers TRE templates \emph{without} negation. The TRE templates listed in Table ~\ref{TREs_Syn_Comp} were provided as input to the two algorithms.
 
-Figure~\ref{fig:plot5} shows the results of the algorithm comparison on real traces generated from a QNX system. The trace used for the evaluation contained 1 million events, with 205 distinct events. It is evident from the figure that mining properties with negation takes approximately 100 times longer than mining properties without negation. This corresponds to the expected speedup of $\frac{\Sigma}{p}$ (see the Discussion section), which in this case is $\frac{205}{2}$.
+\begin{table}[ht]
+	\centering
+	\begin{adjustbox}{max width=\columnwidth}
+		\begin{tabular}{|c|c|}
+			\hline
+			\textbf{TRE Templates for Algorithm ~\ref{alg:alg_without_neg}} & \textbf{TRE Templates for Algorithm ~\ref{alg:alg_neg}} \\
+			\hline
+			 $(\langle P.Q.R \rangle [1, 5000])$& $(\langle P.\verb!^!Q^*.Q.\verb!^!R^*.R \rangle [1, 5000])$  \\
+			 \hline
+		\end{tabular}
+	\end{adjustbox}
+	\caption{Comparing Algorithm 1 and Algorithm 2}
+	\label{TREs_Syn_Comp}
+\end{table}
 
-Figure~\ref{fig:plot6} shows the results of the algorithm comparison on real traces generated from a CAN network. The trace used for the evaluation contained 142,866 events, with 43 distinct events. Again, the figure clearly demonstrates that mining properties with negation takes longer than mining properties without negation, in this case 21.5 times longer. This corresponds to the expected speedup of $\frac{43}{2}$.
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\columnwidth]{Plot1.eps}
+  \caption{Varying Total Number of Events}	
+  \label{fig:plot1}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\columnwidth]{Plot2.eps}
+  \caption{Varying Number of Distinct Events}	
+  \label{fig:plot2}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\columnwidth]{Plot3.eps}
+  \caption{Varying Number of Variables in TRE Templates}
+  \label{fig:plot3}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\columnwidth]{TRESyn.eps}
+  \caption{Comparing Execution of Mining Different Classes of TRE templates}
+  \label{fig:plot4}
+\end{figure}
+
+
+Table~\ref{miningOverhead_time} shows the results of the algorithm comparison on real traces generated from a QNX system. The trace used for the evaluation contained 1 million events, with 205 distinct events. It is evident from the figure that mining properties with negation takes approximately 100 times longer than mining properties without negation. This corresponds to the expected speedup of $\frac{\Sigma}{p}$ (see the Discussion section), which in this case is $\frac{205}{2}$.
+
+Table~\ref{miningOverhead_time} also shows the results of the algorithm comparison on real traces generated from a CAN network. The trace used for the evaluation contained 142,866 events, with 43 distinct events. Again, the figure clearly demonstrates that mining properties with negation takes longer than mining properties without negation, in this case 21.5 times longer. This corresponds to the expected speedup of $\frac{43}{2}$.
+
+
+\begin{table}[ht]
+	\centering
+	\begin{adjustbox}{max width=\columnwidth}
+		\begin{tabular}{|c|c|c|}
+			\hline
+			\textbf{Real System} & \textbf{Time Without Negation \newline (in seconds)} & \textbf{Time With Negation \newline (in seconds)} \\
+			\hline
+			 CAN & 1.03 & 21.83 \\
+			 \hline
+			 QNX & 34.38 & 3498.37\\
+			 \hline
+		\end{tabular}
+	\end{adjustbox}
+	\caption{Results for Real System Traces - QNX and CAN}
+	\label{miningOverhead_time}
+\end{table}
+
 
 Lastly, Figure~\ref{fig:plot4} shows the results of the comparison on a synthesized trace. The size of the trace used for this experiment was 50,000 events, with 30 distinct events. It is evident from the figure that mining properties with negation takes approximately 12 times longer than mining properties without negation. This result also closely approaches the expected speedup of $\frac{\Sigma}{p}$ (see the Discussion section), which in this case is $\frac{30}{2}$.
 
@@ -746,36 +811,25 @@ Lastly, Figure~\ref{fig:plot4} shows the results of the comparison on a synthesi
 % Expected Speed up = 43/2 = Approx 21.5 times as is clear in the plot attached
 
 
-\begin{table*}[ht]
-	\centering
-	\begin{tabular}{|l|l|}
-		\hline
-		\textbf{TRE Templates for Algorithm ~\ref{alg:alg_without_neg}} & \textbf{TRE Templates for Algorithm ~\ref{alg:alg_neg}} \\
-		\hline
-		 $(\langle P.\verb!^!Q^*.Q.\verb!^!R^*.R \rangle [1, 5000])$& $(\langle P.Q.R \rangle [1, 5000])$ \\
-	\end{tabular}
-
-	\caption{Comparing Algorithm 1 and Algorithm 2}
-	\label{miningOverhead}
-\end{table*}
 
 
-\begin{figure*}[ht]
-  \centering
-  \subfloat[Comparing Execution on QNX Traces]{
-  \includegraphics[width=\columnwidth]{QNX_Class_ls.eps}
-  \label{fig:plot5}
-  }
-  \subfloat[Comparing Execution on CAN Traces]{
-  \includegraphics[width=\columnwidth]{CAN_Class_ns.eps}
-  \label{fig:plot6}
-  }
-  \caption{Results on Real System Traces}\label{Algs_real}
-\end{figure*}
+
+%\begin{figure*}[ht]
+%  \centering
+%  \subfloat[Comparing Execution on QNX Traces]{
+%  \includegraphics[width=\columnwidth]{QNX_Class_ls.eps}
+%  \label{fig:plot5}
+%  }
+%  \subfloat[Comparing Execution on CAN Traces]{
+%  \includegraphics[width=\columnwidth]{CAN_Class_ns.eps}
+%  \label{fig:plot6}
+%  }
+%  \caption{Results on Real System Traces}\label{Algs_real}
+%\end{figure*}
 
 \section{Conclusion}
 
-The experimental results confirm the asymptotic analysis of our algorithm's complexity, which is described in previous sections.
+The experimental results confirm the asymptotic analysis of our algorithm's complexity, which is described in previous sections. We present two algorithms for mining of TREs in system traces. Our algorithm is scalable to all commonly occuring temporal properties with increasing number of unique events.
 
 
 %\bibliographystyle{abbrv}
