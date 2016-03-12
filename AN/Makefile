@@ -1,4 +1,4 @@
-#onlysources.tex := reapp.tex
+onlysources.tex := property-mining.tex
 # Copyright 2004 Chris Monson (shiblon@gmail.com)
 # Latest version available at http://www.bouncingchairs.net/oss
 #

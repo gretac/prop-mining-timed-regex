@@ -52,6 +52,8 @@
 
 \newcommand\Myperm[2][n]{\prescript{#1\mkern-2.5mu}{}P_{#2}}
 
+\input{review}
+
 \begin{document}
 
 \title{Mining timed regular expressions from system traces}
@@ -64,40 +66,43 @@
 
 \begin{abstract}
 
-Dynamic behavior of a program can be assessed through an examination of events emitted by the program during execution. For the behavior to be correct it must satisfy a set of specified temporal properties. Temporal properties define the order of occurrence and timing constraints on event occurrence. Such specifications are important for safety-critical real-time systems for which a delayed response to an emitted event may lead to a fault in the system. Since temporal properties are rarely specified for programs and due to the complexity of the formalisms, temporal properties are automatically extracted from traces of program execution. We propose a framework for automatically mining properties that are in the form of timed regular expressions (TREs) from system traces. Using an abstract structure of the property the framework constructs a finite state machine (FSM) to serve as an acceptor. We evaluate our technique on real-world datasets. We formally demonstrate the scalability and performance of our approach by running our implementations on synthesized traces of different sizes with different parameter values.
+Dynamic behavior of a program can be assessed through examination of events emitted by the program during execution. For the behavior to be correct it\pr must satisfy a set of specified temporal properties. Temporal properties define the order of occurrence and timing constraints on event occurrence. Such specifications are important for safety-critical real-time systems for which a delayed response to an emitted event may lead to a fault in the system. Since temporal properties are rarely specified for programs and due to the complexity of the formalisms, it is desirable to suggest properties by extracting them from traces of program execution for testing, verification, anomaly detection, and debugging purposes. 
 
+We propose a framework for automatically mining properties that are in the form of timed regular expressions (TREs) from system traces. Using an abstract structure of the property, the framework constructs a finite state machine to serve as an acceptor. As part of the framework, we propose two novel algorithms optimized for mining general TREs and a fragment without negation. We analytically derive a speedup for the fragment and confirm the speedup using empirical validation with synthetic traces. Overall, the framework is evaluated on industrial strength safety-critical real-time applications (an deployed autonomous hexacopter system, an commercial vehicle in operation) using traces with more than 1 Million timing-sensitive entries.
 \end{abstract}
 
 \section{Introduction}
 
-Temporal behavior of programs is an extensively studied topic ~\cite{lamport1978time, dwyer1999patterns}. % get more sources
+Temporal behavior of programs is an extensively studied topic\SF{no space before the tilde! fix everywhere}~\cite{lamport1978time, dwyer1999patterns}. % get more sources
 Recently, the idea of mining likely temporal properties of programs from system traces has become popular ~\cite{lemieux2015general}.
-Critical and commonly occuring behavioral patterns are typically provided to the mining frameworks, which then mine system specifications of that form. The mining techniques identify a set of specifications that are satisfied by traces w.r.t. certain criteria.
+Critical and commonly occurring behavioral patterns are typically provided to the mining frameworks, which then mine system specifications of that form. The mining techniques identify a set of specifications that are satisfied by traces w.r.t. certain criteria.
 Many programs lack formal temporal specifications, and mined specifications are therefore valuable since they can be used for a wide variety of activities in the software development life cycle (SDLC).
-These activities include software testing ~\cite{dallmeier2010generating}, automated program verification ~\cite{kincaid2015automated}, anomaly detection ~\cite{christodorescu2008mining}, debugging ~\cite{gabel2010online}, etc.
-Further, mined specifications can assist automated verification techniques because they provide an easy and user-friendly way to describe a programs' specifications. As argued by Ammons et al. ~\cite{DBLP:conf/popl/AmmonsBL02}, automated verification techniques are unlikely to be widely adopted unless cheaper and easier ways of formulating specifications are developed.
+These activities include software testing~\cite{dallmeier2010generating}, automated program verification~\cite{kincaid2015automated}, anomaly detection~\cite{christodorescu2008mining}, debugging~\cite{gabel2010online}, etc.
+Further, mined specifications can assist automated verification techniques because they provide an easy and user-friendly way to describe a programs' specifications. As argued by Ammons et al.~\cite{DBLP:conf/popl/AmmonsBL02}, automated verification techniques are unlikely to be widely adopted unless cheaper and easier ways of formulating specifications are developed.
 Consequently, specification mining has gained significant attention in recent times. Different techniques have been developed for mining specifications from templates expressed using regular expressions, LTL, and other custom formats.
 
 Most of the existing research in the context of mining temporal specifications focuses on a qualitative notion of time, i.e., the specifications describe an \emph{ordering} of events. For example, an LTL specification $\Box(\mathrm{request}\,\rightarrow\,\lozenge \mathrm{response})$ specifies that a \emph{request} event should always be eventually followed by a \emph{response} event. Most state-of-the-art techniques do not take into account a \emph{quantitative} notion of time, i.e., the actual duration of time between events is not considered.
 For safety-critical real-time systems, it is important to develop techniques that allow mining of specifications that account for the quantitative notion of time.
 For example, specifications for interrupt handlers, which for real-time systems must complete their executions within a set of predefined deadlines. The time constraints are of importance in such a case since a delayed response to an emitted event may lead to a fault in the system.
 
-With the motivation to address the problem of mining specifications with an explicit notion of time, we propose a technique to mine instances of timed regular expression (TRE) templates satisfied by a given system's traces. TREs ~\cite{timedregex} extend regular expressions by providing additional operators to specify timing constraints between events. By using a set of common patterns of specifications for LTL and regular expressions, we develop the corresponding patterns for TREs. Further, we use the method proposed by Asarin et al. ~\cite{timedregex} to synthesize a timed automaton for a given TRE. The timed automaton is then used as a checker to verify whether traces satisfy the corresponding TRE.
+With the motivation to address the problem of mining specifications with an explicit notion of time, we propose a technique to mine instances of timed regular expression (TRE) templates satisfied by a given system's traces. TREs~\cite{timedregex} extend regular expressions by providing additional operators to specify timing constraints between events. By using a set of common patterns of specifications for LTL and regular expressions, we develop the corresponding patterns for TREs. Further, we use the method proposed by Asarin et al.~\cite{timedregex} to synthesize a timed automaton for a given TRE. The timed automaton is then used as a checker to verify whether traces satisfy the corresponding TRE.
 
-We provide two algorithms for mining instances of TREs from their templates. Both algorithms require a TRE template and system traces as input. The algorithms then use the distinct events from the traces to replace the event variables in the TRE templates with actual events. The resultant \emph{permutations} of the template are TRE instances.
+We provide two algorithms for mining instances of TREs from their templates\SF{also mention that you provide complexity analysis}. Both algorithms require a TRE template and system traces as input. The algorithms then use the distinct events from the traces to replace the event variables in the TRE templates with actual events. The resultant \emph{permutations} of the template are TRE instances.
 Intuitively, traces are processed against the TRE instances with the help of the timed automaton. Further, we define  \emph{confidence} and \emph{support} as metrics to evaluate the degree to which a TRE instance is satisfied by the traces. The algorithms report only the instances which satisfy the given threshold values of confidence and support.
 
 The first algorithm is designed for TRE templates without a negation operator. The second algorithm processes TRE templates with a negation operator.
 We later prove that although both algorithms' execution times are exponential in terms of the number of variables in individual TRE templates, the first algorithm generally runs faster than the second by a certain factor, which depends upon the number of distinct events in a trace and the number of variables in a given TRE template. We also prove that our technique is sound, i.e., a mined specification reported by our algorithms actually satisfies the given thresholds of support and confidence on the provided input traces. Also, our technique is complete, i.e., our algorithms report all TRE instances which comply on given traces w.r.t. the thresholds of support and confidence.
 
-We evaluate our technique on real-world datasets that consist of traces produced by the QNX RTOS ~\cite{QNX_RTOS} during various runs of application software on different hardware platforms. We also evaluate the algorithms on the controller area network (CAN) ~\cite{Davis2007} traces collected from an automobile during different driving phases. We report the performance of our algorithms on the real-life traces in terms of the execution time. We also demonstrate the scalability and efficiency of our approach by running the implementations on synthesized traces of different sizes with different values of parameters such as the number of distinct events, the total number of events in the traces, and the complexity of the TRE templates.
+We evaluate our technique on real-world datasets that consist of traces produced by the QNX Neutrino Real-time Operating System~\cite{QNX_RTOS} during various runs of application software on different hardware platforms. We also evaluate the algorithms on the controller area network (CAN)~\cite{Davis2007} traces collected from an automobile during different driving phases. We report the performance of our algorithms on the real-life traces in terms of the execution time. We also demonstrate the scalability and efficiency of our approach by running the implementations on synthesized traces of different sizes with different values of parameters such as the number of distinct events, the total number of events in the traces, and the complexity of the TRE templates.
 
-The key contributions of this paper involve developing an efficient technique for extracting temporal properties with time constraints in the form of TREs from system traces and evaluating the framework experimentally on industrial real-time systems:
+\noindent The key contributions of this paper include:
 
 \begin{itemize}
-\item We develop two novel algorithms to mine instances of TREs satisfied by a given system's traces. To our knowledge, this is the first technique for mining specifications with an explicit notion of timing constraints (Section ~\ref{Approach}),
-\item Identifying computational approaches that optimize the extraction of the specified properties (Section ~\ref{Approach}),
-\item Demonstrating the frameworks' applicability to large traces collected from real industrial systems (Section ~\ref{discussion}).
+\item An efficient technique for extracting temporal properties with time constraints in the form of Timed Regular Expressions (TREs),
+\item Two novel algorithms to mine instances of TREs from given system traces. To our knowledge, this is the first technique for mining specifications with an explicit notion of timing constraints.
+\item Computational approaches that optimize the extraction of the specified properties for fragments of TREs.
+\item An analytic bound on the speedup of the optimization with an empirical validation corroborating the correctness.
+\item A feasibility and viability study using traces collected from operating safety-critical real-time systems showing the applicability and scalability of the approach.
 \end{itemize}
 
 \section{Background} \label{Background}
