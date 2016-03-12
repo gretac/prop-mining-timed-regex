@@ -52,7 +52,7 @@
 
 \newcommand\Myperm[2][n]{\prescript{#1\mkern-2.5mu}{}P_{#2}}
 
-\input{review}
+%\input{review}
 
 \begin{document}
 
@@ -66,20 +66,20 @@
 
 \begin{abstract}
 
-Dynamic behavior of a program can be assessed through examination of events emitted by the program during execution. For the behavior to be correct it\pr must satisfy a set of specified temporal properties. Temporal properties define the order of occurrence and timing constraints on event occurrence. Such specifications are important for safety-critical real-time systems for which a delayed response to an emitted event may lead to a fault in the system. Since temporal properties are rarely specified for programs and due to the complexity of the formalisms, it is desirable to suggest properties by extracting them from traces of program execution for testing, verification, anomaly detection, and debugging purposes. 
+Dynamic behavior of a program can be assessed through examination of events emitted by the program during execution. For the behavior to be correct it must satisfy a set of specified temporal properties. Temporal properties define the order of occurrence and timing constraints on event occurrence. Such specifications are important for safety-critical real-time systems for which a delayed response to an emitted event may lead to a fault in the system. Since temporal properties are rarely specified for programs and due to the complexity of the formalisms, it is desirable to suggest properties by extracting them from traces of program execution for testing, verification, anomaly detection, and debugging purposes.
 
-We propose a framework for automatically mining properties that are in the form of timed regular expressions (TREs) from system traces. Using an abstract structure of the property, the framework constructs a finite state machine to serve as an acceptor. As part of the framework, we propose two novel algorithms optimized for mining general TREs and a fragment without negation. We analytically derive a speedup for the fragment and confirm the speedup using empirical validation with synthetic traces. Overall, the framework is evaluated on industrial strength safety-critical real-time applications (an deployed autonomous hexacopter system, an commercial vehicle in operation) using traces with more than 1 Million timing-sensitive entries.
+We propose a framework for automatically mining properties that are in the form of timed regular expressions (TREs) from system traces. Using an abstract structure of the property, the framework constructs a finite state machine to serve as an acceptor. As part of the framework, we propose two novel algorithms optimized for mining general TREs and a fragment without negation. We analytically derive a speedup for the fragment and confirm the speedup using empirical validation with synthetic traces. The framework is evaluated on industrial strength safety-critical real-time applications (an deployed autonomous hexacopter system, an commercial vehicle in operation) using traces with more than 1 Million entries. Our algorithm is open source and available online:\href{https://bitbucket.org/sfischme/tre-mining}{https://bitbucket.org/sfischme/tre-mining}
 \end{abstract}
 
 \section{Introduction}
 
-Temporal behavior of programs is an extensively studied topic\SF{no space before the tilde! fix everywhere}~\cite{lamport1978time, dwyer1999patterns}. % get more sources
-Recently, the idea of mining likely temporal properties of programs from system traces has become popular ~\cite{lemieux2015general}.
+Temporal behavior of programs is an extensively studied topic~\cite{lamport1978time, dwyer1999patterns}. % get more sources
+Recently, the idea of mining likely temporal properties of programs from system traces has become popular~\cite{lemieux2015general}.
 Critical and commonly occurring behavioral patterns are typically provided to the mining frameworks, which then mine system specifications of that form. The mining techniques identify a set of specifications that are satisfied by traces w.r.t. certain criteria.
 Many programs lack formal temporal specifications, and mined specifications are therefore valuable since they can be used for a wide variety of activities in the software development life cycle (SDLC).
 These activities include software testing~\cite{dallmeier2010generating}, automated program verification~\cite{kincaid2015automated}, anomaly detection~\cite{christodorescu2008mining}, debugging~\cite{gabel2010online}, etc.
 Further, mined specifications can assist automated verification techniques because they provide an easy and user-friendly way to describe a programs' specifications. As argued by Ammons et al.~\cite{DBLP:conf/popl/AmmonsBL02}, automated verification techniques are unlikely to be widely adopted unless cheaper and easier ways of formulating specifications are developed.
-Consequently, specification mining has gained significant attention in recent times. Different techniques have been developed for mining specifications from templates expressed using regular expressions, LTL, and other custom formats.
+Consequently, specification mining has gained significant attention in recent times. Different techniques have been developed for mining specifications from templates expressed using regular expressions, LTL~\cite{bonato2012dynamic}, and other custom formats.
 
 Most of the existing research in the context of mining temporal specifications focuses on a qualitative notion of time, i.e., the specifications describe an \emph{ordering} of events. For example, an LTL specification $\Box(\mathrm{request}\,\rightarrow\,\lozenge \mathrm{response})$ specifies that a \emph{request} event should always be eventually followed by a \emph{response} event. Most state-of-the-art techniques do not take into account a \emph{quantitative} notion of time, i.e., the actual duration of time between events is not considered.
 For safety-critical real-time systems, it is important to develop techniques that allow mining of specifications that account for the quantitative notion of time.
@@ -87,7 +87,7 @@ For example, specifications for interrupt handlers, which for real-time systems 
 
 With the motivation to address the problem of mining specifications with an explicit notion of time, we propose a technique to mine instances of timed regular expression (TRE) templates satisfied by a given system's traces. TREs~\cite{timedregex} extend regular expressions by providing additional operators to specify timing constraints between events. By using a set of common patterns of specifications for LTL and regular expressions, we develop the corresponding patterns for TREs. Further, we use the method proposed by Asarin et al.~\cite{timedregex} to synthesize a timed automaton for a given TRE. The timed automaton is then used as a checker to verify whether traces satisfy the corresponding TRE.
 
-We provide two algorithms for mining instances of TREs from their templates\SF{also mention that you provide complexity analysis}. Both algorithms require a TRE template and system traces as input. The algorithms then use the distinct events from the traces to replace the event variables in the TRE templates with actual events. The resultant \emph{permutations} of the template are TRE instances.
+We provide two algorithms for mining instances of TREs from their templates and also detailed worst case complexity analysis of the two algorithms. Both algorithms require a TRE template and system traces as input. The algorithms then use the distinct events from the traces to replace the event variables in the TRE templates with actual events. The resultant \emph{permutations} of the template are TRE instances.
 Intuitively, traces are processed against the TRE instances with the help of the timed automaton. Further, we define  \emph{confidence} and \emph{support} as metrics to evaluate the degree to which a TRE instance is satisfied by the traces. The algorithms report only the instances which satisfy the given threshold values of confidence and support.
 
 The first algorithm is designed for TRE templates without a negation operator. The second algorithm processes TRE templates with a negation operator.
@@ -109,10 +109,10 @@ We evaluate our technique on real-world datasets that consist of traces produced
 
 \subsection{Timed Regular Expressions}
 
-Regular expressions offer a declarative way to express the patterns for any system property or specification. Every language defined by a regular expression is also defined by a finite automaton ~\cite{book1}. There is a way to convert any regular expression into a non-deterministic automaton, and further to convert from a non-deterministic to a deterministic automaton. We can thus generate a calssical Deterministic Finite Automaton (DFA) for any property expressed as a regular expression.
+Regular expressions offer a declarative way to express the patterns for any system property or specification. Every language defined by a regular expression is also defined by a finite automaton~\cite{book1}. There is a way to convert any regular expression into a non-deterministic automaton, and further to convert from a non-deterministic to a deterministic automaton. We can thus generate a calssical Deterministic Finite Automaton (DFA) for any property expressed as a regular expression.
 
 
-Classical automata theory handles only the \emph{qualitative} notion of time, i.e. a sequence of events specifies the ordering of events but not the time between occurrence of these events in terms of ``real time". An abstraction of this sort has been found useful for analysis of certain systems [???], whereas many other application domains require more detailed models which include accurate timing information [???]. For example, we might want to modify a formal specification \emph{``a is followed by b"} to a more precise specification with timing constraints \emph{``a is followed by b within $x$ seconds"}. Since our focus lies on real-time safety-critical systems, we need to develop techniques for mining specifications that include the relevant timing information. We use the formalism of Timed Regular Expressions (TREs) for our purpose as it allows for defining explicit timing constraints in the model. We will formally describe our nomenclature.
+Classical automata theory handles only the \emph{qualitative} notion of time, i.e. a sequence of events specifies the ordering of events but not the time between occurrence of these events in terms of ``real time". An abstraction of this sort has been found useful for analysis of certain systems, whereas many other real time safety critical application domains require more detailed models which include accurate timing information. For example, we might want to modify a formal specification \emph{``a is followed by b"} to a more precise specification with timing constraints \emph{``a is followed by b within $x$ seconds"}. Since our focus lies on real-time safety-critical systems, we need to develop techniques for mining specifications that include the relevant timing information. We use the formalism of Timed Regular Expressions (TREs) for our purpose as it allows for defining explicit timing constraints in the model. We will formally describe our nomenclature.
 
 \newtheorem{defns}{Definition}
 
@@ -124,7 +124,7 @@ The sequences of events in the trace are ordered by time stamps.
 The alphabet of events is defined by the system generating the traces. The events have associated meaning pertaining to the functionality of the system.
 
 
-\begin{defns}[Timed Regular Expression (TRE) \cite{timedregex}]
+\begin{defns}[Timed Regular Expression (TRE)~\cite{timedregex}]
 Timed regular expressions (TREs) over an alphabet $\Sigma$ (also referred to as $\Sigma$-expressions) are defined using the following families of rules:
 \begin{itemize}
   \item  \underbar{a} for every letter a $\in \Sigma$ and the special symbol $\epsilon$ are expressions,
@@ -154,9 +154,9 @@ A TRE instance corresponds to a TRE template and has an identical TRE structure.
 
 \subsection{Timed Automata}
 
-Timed automata \cite{Alur:1994:TTA:180782.180519} have been investigated quite rigourously in the recent past. The main motivation for using timed automata is their suitability for modeling time-dependent behavior, and the ability to monitor their reachability \cite{LPY97}. Timed automata are equipped with clocks, making them perfect for modelling and verification of real-time systems' behavior \cite{Alur:1994:TTA:180782.180519}. Classical models like finite automata, Petri-nets, etc., are not suitable since they cannot express such explicit timing constraints natuarally present in real-life systems. Another important property of the timed automata is that the reachability properties are decidable \cite{Alur:1994:TTA:180782.180519}, even though the timed automata have an infinite number of configurations. The main idea behind this result is the construction of a region-automaton, which finitely abstracts the behavior of timed automata in a way that checking reachability in a timed automaton reduces to checking reachability in a finite automaton.
+Timed automata~\cite{Alur:1994:TTA:180782.180519} have been investigated quite rigourously in the recent past. The main motivation for using timed automata is their suitability for modeling time-dependent behavior, and the ability to monitor their reachability~\cite{LPY97}. Timed automata are equipped with clocks, making them perfect for modelling and verification of real-time systems' behavior~\cite{Alur:1994:TTA:180782.180519}. Classical models like finite automata, Petri-nets, etc., are not suitable since they cannot express such explicit timing constraints natuarally present in real-life systems. Another important property of the timed automata is that the reachability properties are decidable~\cite{Alur:1994:TTA:180782.180519}, even though the timed automata have an infinite number of configurations. The main idea behind this result is the construction of a region-automaton, which finitely abstracts the behavior of timed automata in a way that checking reachability in a timed automaton reduces to checking reachability in a finite automaton.
 
-\begin{defns}[Timed Automata \cite{timedregex}]
+\begin{defns}[Timed Automata~\cite{timedregex}]
 A timed automaton  $\mathcal{A}$ is a tuple $\langle Q,C,\Delta ,\Sigma, s,F\rangle$ where $Q$ is a finite set of states, $C$ is a finite set of clocks, $\Sigma$ is an input (or event) alphabet, $\Delta$ is a transition relation, $s \in Q$ an initial state and $F \subset Q$ a set of accepting states. The transition relation consists of tuples of the form $\langle q ,\phi ,\rho, a, q' \rangle$ where $q$ and $q'$  are states, $a \in \Sigma \cup \{\epsilon \}$ is a letter, $\rho \subseteq C$ and $\phi$ (the transition guard) is a boolean combination of formulae of the form $(x \in I)$ for some clock $x$ and some integer-bounded interval $I$.
 \end{defns}
 
@@ -188,9 +188,9 @@ $Reset_\rho$ resets all the clocks in $\rho$ to zero and leaves the other clocks
 \end{figure}
 
 
-It has been proven that every timed regular language  defined by a generalilzed regular expression can be recognized by a timed automaton \cite{timedregex}. We present a few simple examples of representing TREs using timed automata.
+It has been proven that every timed regular language  defined by a generalilzed regular expression can be recognized by a timed automaton~\cite{timedregex}. We present a few simple examples of representing TREs using timed automata.
 
-Consider the TRE $\langle \varphi_1  \rangle_I$ and its equivalent timed automaton shown in \ref{fig:tretoautomata}. Within the rectangle, we have the acceptor for $\varphi_1$ with no timing constraints. For the timed operator, a new clock $x$ is introduced and a test $x \in I$ has been added to guard every transition leading to the final state $f$.
+Consider the TRE $\langle \varphi_1  \rangle_I$ and its equivalent timed automaton shown in Figure~\ref{fig:tretoautomata}. Within the rectangle, we have the acceptor for $\varphi_1$ with no timing constraints. For the timed operator, a new clock $x$ is introduced and a test $x \in I$ has been added to guard every transition leading to the final state $f$.
 
 
 Lets further examine the basic idea behind construction of a timed automaton for $\varphi^*$. If the time interval applies to each $\varphi$ separately, then the clocks need to be reset at each new iteration of $\varphi$. On the other hand, if the time interval applies to the whole $\varphi^*$ expression, we need the values of all clocks at each new iteration of $\varphi$ to represent the total time elapsed in the previous iterations. This is achieved by adding a new clock $x$ which is never reset to zero and transitions to the initial state in which all the clocks get the value of $x$.
@@ -201,7 +201,7 @@ Lets further examine the basic idea behind construction of a timed automaton for
 The TRE instances generated by the binding contain every permutation of events in the alphabet within the TRE template. There is thus a total of $\Sigma^p$ possible TRE instances. Generally, we are interested in mining all of the valid TRE instances.
 However, these instances contain both interesting and frequently occuring patterns, as well as those that might have been present just a handfull of times in the trace. We thus use a ranking component to reduce the mined set to contain only the dominant instances, or specifications.
 
-First, we will only consider properties that are \emph{valid}~\cite{lemieux2015general}. We express that a binding and its corresponding TRE instance are interesting if the TRE instance holds on each trace, thus $100 \%$ valid. We also use the concepts of support and confidence from ~\cite{lemieux2015general}.
+First, we will only consider properties that are \emph{valid}~\cite{lemieux2015general}. We express that a binding and its corresponding TRE instance are interesting if the TRE instance holds on each trace, thus $100 \%$ valid. We also use the concepts of support and confidence from~\cite{lemieux2015general}.
 
 \begin{defns}[Support Potential]
 The support of a TRE instance $\pi$ on a trace $t$ is the number of time points of trace $t$ which \emph{could} falsify $\pi$.
@@ -225,7 +225,7 @@ We will examine different threshold values for both support and confidence and w
 
 \subsection{Workflow}
 
-Figure ~\ref{fig:approach} provides a high level overview of the technique we propose for mining temporal properties from system traces.
+Figure~\ref{fig:approach} provides a high level overview of the technique we propose for mining temporal properties from system traces.
 
 \begin{figure}[h]
   \centering
@@ -261,7 +261,7 @@ An intuitive way to evaluate a TRE on a system execution trace is to recursively
 \item \textbf{Checking TRE instances over traces} Iterate over the trace and process each time event pair by matching them to the relavant TRE instances. Update the \emph{success} and \emph{reset} for the relevant TRE instances at each trace event.
 \end{itemize}
 
-Below, in Algorithm ~\ref{alg:alg_without_neg}, is a detailed description of the above steps in form of pseudo code.
+Below, in Algorithm~\ref{alg:alg_without_neg}, is a detailed description of the above steps in form of pseudo code.
 
 \begin{algorithm}[h]
     \caption{Timed Regular Expression Mining without Negation}
@@ -304,13 +304,13 @@ Below, in Algorithm ~\ref{alg:alg_without_neg}, is a detailed description of the
 \label{alg:alg_neg}
 \end{algorithm}
 
-In Algorithm ~\ref{alg:alg_without_neg}, $\Sigma$ is the events alphabet and $p$ is the number of event variables in the TRE template without negation. $A$ denotes the timed automaton and $FS$ and $ES$ denote the final and error states of the timed automaton respectively. $S$ and $C$ denote the \emph{support} and \emph{confidence} metrics of the TRE instances on the given trace.
+In Algorithm~\ref{alg:alg_without_neg}, $\Sigma$ is the events alphabet and $p$ is the number of event variables in the TRE template without negation. $A$ denotes the timed automaton and $FS$ and $ES$ denote the final and error states of the timed automaton respectively. $S$ and $C$ denote the \emph{support} and \emph{confidence} metrics of the TRE instances on the given trace.
 
-In contrast, Algorithm ~\ref{alg:alg_neg} evaluates the TREs with negation and has a loop to iterate over all possible permutations (see the Discussion for an explanation of the differences in run times of the loops).
+In contrast, Algorithm~\ref{alg:alg_neg} evaluates the TREs with negation and has a loop to iterate over all possible permutations (see the Discussion for an explanation of the differences in run times of the loops).
 
 \subsection{Temporal Property Patterns}
 
-The proposed technique relies on mining patterns that include timing constraints. Of interest are the most commonly occurring temporal property patterns, as descrbed in ~\cite{evans1}. In order to make use of these patterns, we extend them by transforming them into TRE Property Patterns. Let us assume we have several causing events $P$ to share one effect event $S$. The TRE property patterns are presented in Table~\ref{TRE_Exp}. The properties impose timing constraints on events by adding a time interval $[x, y]$, where $x \le y$ are fixed doubles.
+The proposed technique relies on mining patterns that include timing constraints. Of interest are the most commonly occurring temporal property patterns, as described in~\cite{evans1}. In order to make use of these patterns, we extend them by transforming them into TRE Property Patterns. Let us assume we have several causing events $P$ to share one effect event $S$. The TRE property patterns are presented in Table~\ref{TRE_Exp}. The properties impose timing constraints on events by adding a time interval $[x, y]$, where $x \le y$ are fixed doubles.
 
 \begin{table}[ht]
   \centering
@@ -333,14 +333,14 @@ The proposed technique relies on mining patterns that include timing constraints
 
 \section{Discussion} \label{discussion}
 
-We will examine the follwoing important characteristics of the proposed temporal property mining technique: soundness, completeness, optimality (in terms of space and runtime), and scalability.
+We will examine the following important characteristics of the proposed temporal property mining technique: soundness, completeness, optimality (in terms of space and runtime), and scalability.
 
 
 \subsection{Sound and Complete}
 
 We argue that the technique we proposed and described in this paper is sound and complete. By sound we mean that a mined specification reported by our algorithms actually satisfies the given thresholds for confidence and support in the provided input traces. This is the case because our algorithm continuously keeps track of the success and reset rates for each TRE instance in the results matrix. The rates are direct results of execution of the acceptor automaton for the TRE on a trace and are used for calculation of the confidence value for the TRE instance. Given that the reported rates and the derived confidence value are valid, it follows that the derived support value is valid as well. Therefore, any mined specification that our algorithms report satisfies the confidence and support constraints.
 
-By characterizing our technique as complete we mean that our algorithms report \emph{all} the mined specifications that comply with the given thresholds for confidence and suport in the provided input traces. Upon reading a time event pair from the trace, our technique examines every TRE instance that can be affected. If the property contains negation, all the TRE instances are examined at every line of the trace. If the property does not contain negation, all TRE instances that can be affected by the trace event are examined. Thus, at every line of the trace, all the relevant TRE instances are evaluated by the timed automaton. Since all the evaluation results are contained within the matrix, the results for every TRE will be considered when evaluating against the confidence and support thresholds. Therefore, the algorithm will report \emph{all} the TRE instances, the mined specifications, that comply with the confidence and support constraints.
+By characterizing our technique as complete we mean that our algorithms report \emph{all} the mined specifications that comply with the given thresholds for confidence and support in the provided input traces. Upon reading a time event pair from the trace, our technique examines every TRE instance that can be affected. If the property contains negation, all the TRE instances are examined at every line of the trace. If the property does not contain negation, all TRE instances that can be affected by the trace event are examined. Thus, at every line of the trace, all the relevant TRE instances are evaluated by the timed automaton. Since all the evaluation results are contained within the matrix, the results for every TRE will be considered when evaluating against the confidence and support thresholds. Therefore, the algorithm will report \emph{all} the TRE instances, the mined specifications, that comply with the confidence and support constraints.
 
 
 \subsection{Memory Requirements}
@@ -351,11 +351,11 @@ The storage requirements for the matrix are directly influenced by $p$ and $\Sig
 We want to encode the matrix to hold the evaluation results of every TRE instance generated by binding the events from $\Sigma$ to the $p$ event variables in the TRE template. There are $\Sigma^p$ possible TRE instances, thus we need $O(\Sigma^p)$ space to hold the acceptor results.
 
 The dimensionality of the matrix grows proportionally to $p$, the number of symbols in the desired property.
-Complex properties that encode a relationship between a large number of events will result in higehr values of $p$.
+Complex properties that encode a relationship between a large number of events will result in higher values of $p$.
 Increasing values of $p$ in tern will result in exponential space growth.
-However, the majority of properties of interest represent relationships among a few events only ~\cite{evans1,dwyer1999patterns}.
+However, the majority of properties of interest represent relationships among a few events only~\cite{evans1,dwyer1999patterns}.
 Therefore, in general, the dimension $p$ of the matrix will remain small.
-According to the properties listed in ~\cite{dwyer1999patterns}, the typical property will be constrained to 6 events.
+According to the properties listed in~\cite{dwyer1999patterns}, the typical property will be constrained to 6 events.
 
 The value of $\Sigma$, on the other hand, affects the size of each dimension.
 The number of unique events $\Sigma$ in the trace will depend on the complexity of the program or system.
@@ -364,9 +364,8 @@ exponential space complexity.
 
 
 Next, we consider the storage requirements for the timed automaton used to evaluate the TRE.
-The storage required for the FSM is proportional to the number of its states ~\cite{book1}.
-If $n$ is the length of the TRE, then an equivalent NFA has $O(n)$ states and an equivalent DFA has at most $O(\Sigma^n)$ states. Similar to the matrix, complex properties that encode a lot of relationships between events result in exponential space growth for the FSM. However, majority of interesting properties will remain simple ~\cite{dwyer1999patterns}.
-
+The storage required for the FSM is proportional to the number of its states~\cite{book1}.
+If $n$ is the length of the TRE, then an equivalent NFA has $O(n)$ states and an equivalent DFA has at most $O(\Sigma^n)$ states. Similar to the matrix, complex properties that encode a lot of relationships between events result in exponential space growth for the FSM. However, majority of interesting properties will remain simple~\cite{dwyer1999patterns}.
 
 Lastly, the storage requirements for the trace are equivalent to the length of the trace, $O(L)$.
 Our mining approach examines one time event pair from the trace at a time, without needing to
@@ -379,22 +378,22 @@ The proposed technique is thus scalable with the growing trace size $L$ and with
 
 \subsubsection{Run Time Requirements}
 
-We assess the performance of our temporal property mining technique in terms of the time required to mine a TRE template on a collected system trace $t$ of length $L$. The execution time of the proposed technique differs depending on whether negation is included within the expression. We will consider the execution time of the main loop in Algorithm ~\ref{alg:alg_without_neg} (without negation) and Algorithm ~\ref{alg:alg_neg} (with negation).
+We assess the performance of our temporal property mining technique in terms of the time required to mine a TRE template on a collected system trace $t$ of length $L$. The execution time of the proposed technique differs depending on whether negation is included within the expression. We will consider the execution time of the main loop in Algorithm~\ref{alg:alg_without_neg} (without negation) and Algorithm~\ref{alg:alg_neg} (with negation).
 
 \vspace{3mm}
 
 \noindent \textbf{TRE Templates \emph{with} Negation}
 
-Lets first consider the run time of the loop in Algorithm ~\ref{alg:alg_neg} for TRE templates with negation.
+Lets first consider the run time of the loop in Algorithm~\ref{alg:alg_neg} for TRE templates with negation.
 When an event variable in the TRE template is negated, the automaton must evaluate nearly all the TRE instances in the matrix.
-This is bacause for any negated event variable, we must consider the entire event alphabet minus the event bound to the variable. The satisfiability of any of these TRE instances may be affected.
+This is because for any negated event variable, we must consider the entire event alphabet minus the event bound to the variable. The satisfiability of any of these TRE instances may be affected.
 For the analysis we look at the total number of distinct event sequences to be evaluated.
 
 Consider TRE template \emph{not 0}.
-0 can be bound to `b', forming TRE instance \emph{not `b'}. An event `a' in the trace will affect the satisfiability of this TRE instance, thus its automaton is updated. Similarly, satisfiability will be affected for TRE instances that result from bindings with all other event sybols other than `a'.
+0 can be bound to `b', forming TRE instance \emph{not `b'}. An event `a' in the trace will affect the satisfiability of this TRE instance, thus its automaton is updated. Similarly, satisfiability will be affected for TRE instances that result from bindings with all other event symbols other than `a'.
 On the other hand, if 0 is bound to `a', forming TRE instance \emph{not `a'}, and we see an event `a' in the trace, we do not need to update the automaton for the instance. Thus, for $p=1$, we need to evaluate the automaton for $(\Sigma - 1)$ permutations.
 
-For the worst case analysis, we consider TRE templates where all event variables are negated. At any negated event variable in the template we will similarly consider $(\Sigma - 1)$ possibilities. Table ~\ref{Exec-neg} contains the analysis for the first three values of $p$.
+For the worst case analysis, we consider TRE templates where all event variables are negated. At any negated event variable in the template we will similarly consider $(\Sigma - 1)$ possibilities. Table~\ref{Exec-neg} contains the analysis for the first three values of $p$.
 
 \begin{table}[ht]
   \centering
@@ -412,7 +411,7 @@ For the worst case analysis, we consider TRE templates where all event variables
 \caption{Execution Time with Negation} \label{Exec-neg}
 \end{table}
 
-In general, for any TRE template, we are sampling $p$ events from an alphabet of size $\Sigma - 1$ with replacement and ordering. This results in $(\Sigma - 1)^p$ possible combinations to be considered in the loop of Algorithm ~\ref{alg:alg_neg}.
+In general, for any TRE template, we are sampling $p$ events from an alphabet of size $\Sigma - 1$ with replacement and ordering. This results in $(\Sigma - 1)^p$ possible combinations to be considered in the loop of Algorithm~\ref{alg:alg_neg}.
 
 The automaton will thus evaluate $O((\Sigma - 1)^p)$ TRE instances for every time-event pair in the trace. Given that the length of the trace $t$ is $L$, the worst case execution time per trace will be $O((\Sigma - 1)^p \cdot L)$.
 
@@ -420,9 +419,9 @@ The automaton will thus evaluate $O((\Sigma - 1)^p)$ TRE instances for every tim
 
 \noindent \textbf{TRE Templates \emph{without} Negation}
 
-Next we examine the run time of the main loop in Algorithm ~\ref{alg:alg_without_neg} for TRE templates without negation. This case differs in that only the TRE instances where the bounded event corresponds to that read from the trace needs to be evaluated. We can thus reduce the previous run time by evaluating ony a subset of all TRE instances that contain the trace event. Providing a bound on the worst case execution time relies on an analysis of the subset of TRE instances that contain the observed event.
+Next we examine the run time of the main loop in Algorithm~\ref{alg:alg_without_neg} for TRE templates without negation. This case differs in that only the TRE instances where the bounded event corresponds to that read from the trace needs to be evaluated. We can thus reduce the previous run time by evaluating only a subset of all TRE instances that contain the trace event. Providing a bound on the worst case execution time relies on an analysis of the subset of TRE instances that contain the observed event.
 
-For the worst case analysis, we consider permutations of $p$ events without repetition and with ordering. One of the event variables will always be bound to the observed trace event. In the Table \ref{Exec-noneg}, we assume that event `a' is observed in the trace and \underline{a} means that the corresponding event variable is bound to event `a'. By \underline{$\neg$ a} we mean an event symbol other than `a' is bound to the event variable. If \underline{$\neg$ a} is used more than once in an event sequence, the chosen events have to be distinct since the permutations are formulated without replacement. Thus, with each such chosen event, the total number of available events decreases by 1. Table ~\ref{Exec-noneg} contains the analysis for the first three values of $p$.
+For the worst case analysis, we consider permutations of $p$ events without repetition and with ordering. One of the event variables will always be bound to the observed trace event. In the Table~\ref{Exec-noneg}, we assume that event `a' is observed in the trace and \underline{a} means that the corresponding event variable is bound to event `a'. By \underline{$\neg$ a} we mean an event symbol other than `a' is bound to the event variable. If \underline{$\neg$ a} is used more than once in an event sequence, the chosen events have to be distinct since the permutations are formulated without replacement. Thus, with each such chosen event, the total number of available events decreases by 1. Table~\ref{Exec-noneg} contains the analysis for the first three values of $p$.
 
 \begin{table}[ht]
   \centering
@@ -456,11 +455,11 @@ The automaton will thus evaluate $O(p \cdot \Myperm[(\Sigma - 1)]{(p - 1)})$ TRE
 $O(p \cdot \Myperm[(\Sigma - 1)]{(p - 1)} \cdot L)$.
 \end{sloppypar}
 
-Notice that the approximate relative speedup of Algorithm ~\ref{alg:alg_without_neg} (without negation) as compared to Algorithm ~\ref{alg:alg_neg} (with negation) is $\frac{\Sigma}{p}$. This observation will be assessed through the experimental evaluation in the next section.
+Notice that the approximate relative speedup of Algorithm~\ref{alg:alg_without_neg} (without negation) as compared to Algorithm~\ref{alg:alg_neg} (with negation) is $\frac{\Sigma}{p}$. This observation will be assessed through the experimental evaluation in the next section.
 
 %% Discuss optimality & scalability
 
-Generally, scalability of property mining techniques is limited [???].
+Generally, scalability of property mining techniques is limited.
 The techniques tend to scale poorly with the growing size of the input trace $L$. Our technique is optimal in that respect as for both Algorithms the run time grows linearly with the increasing size of $L$. Given that $L \gg \Sigma$ and $L \gg p$, reading each line of the trace at most once is optimal.
 Finally, as mentioned earlier, since the majority of interesting properties are not complex, $\Sigma^p$ will remain small in practice.
 
@@ -471,10 +470,10 @@ In this Section, we demonstrate the performance and scalability of our approach 
 
 The implementation is made using a combination of R and C++ and is made available as an R package \footnote{\url{https://github.com/gretac/ura.git}}. We use an R package `Rcpp'\footnote{\url{http://www.rcpp.org/}} for integration of R and C++ and make use of C++ internally for better performance. Ragel\footnote{\url{http://www.colm.net/open-source/ragel/}} is a framework we used to synthesize Timed Automata for TREs.
 
-We developed TRE property pattern variants, such as shown in Table~\ref{TRE_Exp}, of commonly used patterns of QREs ~\cite{evans1}. By using these TRE variants as TRE templates, we mined TRE instances from real-world system traces: QNX tracelogger and controller area network (CAN) communication traces. We used different thresholds for \emph{support} and \emph{confidence} to uncover interesting TRE instances. Further, to demonstrate the performance and scalability of our approach, we synthesized traces for different configurations w.r.t. the length of traces, number of variables in a TRE template, and the number of distinct events in traces. For the experiments, we used a single eight core machine equipped with the Intel i7-3820 CPU at 3.60 GHz and 31.4 Gb of RAM. The machine runs Ubuntu 14.04 LTS 64 bit.
+We developed TRE property pattern variants, such as shown in Table~\ref{TRE_Exp}, of commonly used patterns of QREs~\cite{evans1}. By using these TRE variants as TRE templates, we mined TRE instances from real-world system traces: QNX tracelogger and controller area network (CAN) communication traces. We used different thresholds for \emph{support} and \emph{confidence} to uncover interesting TRE instances. Further, to demonstrate the performance and scalability of our approach, we synthesized traces for different configurations w.r.t. the length of traces, number of variables in a TRE template, and the number of distinct events in traces. For the experiments, we used a single eight core machine equipped with the Intel i7-3820 CPU at 3.60 GHz and 31.4 Gb of RAM. The machine runs Ubuntu 14.04 LTS 64 bit.
 
 \subsection{TRE Templates}
-The following four TRE templates are used for the evaluation of both real and synthetic traces. These are the first four TRE property patterns listed in Table~\ref{TRE_Exp} and parametrized with a time interval of 0 to 3,000.
+The following four TRE templates are used for the evaluation of both real and synthetic traces. These are the first four TRE property patterns listed in Table~\ref{TRE_Exp} and parameterized with a time interval of 0 to 3,000.
 \vspace{2mm}
 
 \noindent \textbf{T-1 (response)}: $(\verb!^!P)^*.((\langle P.(\verb!^!S)^*.S\rangle[0, 3000]).(\verb!^!P)^*$
@@ -637,7 +636,7 @@ The results show that higher threshold values for support and confidence result 
 \end{table}
 
 % short description of the traces used for the evaluation
-Controller area network (CAN) bus is the primary communication medium over which the electrical control units (ECU) within a vehicle exchange commands and information. Each message on the network can be distinguished by an associated ID, which is unique per message type. So, for instance, messages that contain the vehile speed will have a unique and unchanging message ID. Messages transmitted on the network also have an associated timestamp. The actual contents of each message are encoded in a manufacturer specific way. Our interest lies in the time and ID of transmitted messages, and not in the exact content of the message. We treat each message ID as an event occuring in the system.
+Controller area network (CAN) bus is the primary communication medium over which the electrical control units (ECU) within a vehicle exchange commands and information. Each message on the network can be distinguished by an associated ID, which is unique per message type. So, for instance, messages that contain the vehicle speed will have a unique and unchanging message ID. Messages transmitted on the network also have an associated time stamp. The actual contents of each message are encoded in a manufacturer specific way. Our interest lies in the time and ID of transmitted messages, and not in the exact content of the message. We treat each message ID as an event occurring in the system.
 
 % Talk about the goals of this portion of the evaluation
 For the evaluation we collected a set of traces of CAN network activity produced from an idling vehicle with the engine on. Of interest in this portion of the evaluation are the optimal thresholds for support and confidence that would produce a minimal dominant set of specifications that can be assessed by system designers.
@@ -692,7 +691,7 @@ In this first setup, we varied the total number of events in the traces. The num
 
 The results are shown in Figure~\ref{fig:plot1}. The x axis represents the total number of events in the traces, and the y axis represents the average execution time of our mining algorithm. Note that the measurement of the execution time includes only the processing of trace events (within the main loop of Algorithm~\ref{alg:alg_without_neg}). The measurement does not include the initialization of the algorithm, the overhead of which is constant.
 
-As shown in Figure~\ref{fig:plot1}, the executuon of our mining algorithms grows linearly w.r.t. the total number of events in the trace. For example, the average execution time is 170 milliseconds for processing 0.1 million events.
+As shown in Figure~\ref{fig:plot1}, the execution of our mining algorithms grows linearly w.r.t. the total number of events in the trace. For example, the average execution time is 170 milliseconds for processing 0.1 million events.
 
 \vspace{3mm}
 
@@ -730,14 +729,14 @@ It is evident that the average execution time grows exponentially. The average t
 
 \subsection{Comparing Algorithm Performance}
 
-Next, we compared the performance of Algorithm ~\ref{alg:alg_without_neg} and Algorithm ~\ref{alg:alg_neg}, where Algorithm ~\ref{alg:alg_neg} considers TRE templates with negation and Algorithm ~\ref{alg:alg_without_neg} considers TRE templates \emph{without} negation. The TRE templates listed in Table ~\ref{TREs_Syn_Comp} were provided as input to the two algorithms when using synthetically generated traces.
+Next, we compared the performance of Algorithm~\ref{alg:alg_without_neg} and Algorithm~\ref{alg:alg_neg}, where Algorithm~\ref{alg:alg_neg} considers TRE templates with negation and Algorithm~\ref{alg:alg_without_neg} considers TRE templates \emph{without} negation. The TRE templates listed in Table~\ref{TREs_Syn_Comp} were provided as input to the two algorithms when using synthetically generated traces.
 
 \begin{table}[ht]
 	\centering
 	\begin{adjustbox}{max width=\columnwidth}
 		\begin{tabular}{|c|c|}
 			\hline
-			\textbf{TRE Templates for Algorithm ~\ref{alg:alg_without_neg}} & \textbf{TRE Templates for Algorithm ~\ref{alg:alg_neg}} \\
+			\textbf{TRE Templates for Algorithm~\ref{alg:alg_without_neg}} & \textbf{TRE Templates for Algorithm~\ref{alg:alg_neg}} \\
 			\hline
 			 $(\langle P.Q.R \rangle [1, 5000])$& $(\langle P.\verb!^!Q^*.Q.\verb!^!R^*.R \rangle [1, 5000])$  \\
 			 \hline
@@ -768,12 +767,27 @@ Next, we compared the performance of Algorithm ~\ref{alg:alg_without_neg} and Al
   \label{fig:plot3}
 \end{figure}
 
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=\columnwidth]{TRESyn.eps}
-  \caption{Comparing Execution of Mining Different Classes of TRE templates}
-  \label{fig:plot4}
-\end{figure}
+%\begin{figure}[ht]
+%  \centering
+%  \includegraphics[width=\columnwidth]{TRESyn.eps}
+%  \caption{Comparing Execution of Mining Different Classes of TRE templates}
+%  \label{table:syn_timing}
+%\end{figure}
+\begin{table}[ht]
+	\centering
+	\begin{adjustbox}{max width=\columnwidth}
+		\begin{tabular}{|c|c|c|}
+			\hline
+			  & \textbf{Time Without Negation \newline (in seconds)} & \textbf{Time With Negation \newline (in seconds)} \\
+			\hline
+			 Synthetic Traces & 9.50 & 111.82 \\
+			 \hline
+		\end{tabular}
+	\end{adjustbox}
+	\caption{Comparing Execution Time of Mining Different Classes of TRE templates}
+	\label{table:syn_timing}
+\end{table}
+
 
 For evaluation of real system traces we used the TRE patterns T-1, T-2, T-3 and T-4.
 
@@ -800,7 +814,7 @@ Table~\ref{miningOverhead_time} also shows the results of the algorithm comparis
 \end{table}
 
 
-Lastly, Figure~\ref{fig:plot4} shows the results of the comparison on a synthesized trace. The size of the trace used for this experiment was 50,000 events, with 30 distinct events. It is evident from the figure that mining properties with negation takes approximately 12 times longer than mining properties without negation. This result also closely approaches the expected speedup of $\frac{\Sigma}{p}$ (see the Discussion section), which in this case is $\frac{30}{2}$.
+Lastly, Table~\ref{table:syn_timing} shows the results of the comparison on a synthesized trace. The size of the trace used for this experiment was 50,000 events, with 30 distinct events. It is evident from the figure that mining properties with negation takes approximately 12 times longer than mining properties without negation. This result also closely approaches the expected speedup of $\frac{\Sigma}{p}$ (see the Discussion section), which in this case is $\frac{30}{2}$.
 
 % 1) QNX
 % Trace Properties:
@@ -835,7 +849,7 @@ Lastly, Figure~\ref{fig:plot4} shows the results of the comparison on a synthesi
 
 \section{Conclusion}
 
-The experimental results confirm the asymptotic analysis of our algorithm's complexity, which is described in previous sections. We present two algorithms for mining of TREs in system traces. Our algorithm is scalable to all commonly occuring temporal properties with increasing number of unique events.
+The experimental results confirm the asymptotic analysis of our algorithm's complexity, which is described in previous sections. We present two algorithms for mining of TREs in system traces. Our algorithm is scalable to all commonly occurring temporal properties with increasing number of unique events.
 
 
 %\bibliographystyle{abbrv}
